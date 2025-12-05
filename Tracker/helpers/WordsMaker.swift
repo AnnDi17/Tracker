@@ -2,8 +2,6 @@
 //  words.swift
 //  Tracker
 //
-//  Created by Анна Лапухина on 23.11.2025.
-//
 
 final class WordsMaker {
     static let standard: WordsMaker = WordsMaker()
