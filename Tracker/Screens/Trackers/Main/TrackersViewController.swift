@@ -120,31 +120,10 @@ final class TrackersViewController: UIViewController {
                 schedule: days2
             )
         ]
-        
-        let trackers2 = [
-            Tracker(
-                id: UUID(),
-                name: "Фортепиано",
-                color: .TrGray,
-                emoji: "🎹",
-                schedule: days1
-            ),
-            Tracker(
-                id: UUID(),
-                name: "Барабаны",
-                color: .yellow,
-                emoji: "🪘",
-                schedule: days2
-            )
-        ]
+
         let testCategory1 = TrackerCategory(
             title: "Домашние дела",
             trackers: trackers1
-        )
-        
-        let testCategory2 = TrackerCategory(
-            title: "Обучение",
-            trackers: trackers2
         )
         categories.append(testCategory1)
     }
