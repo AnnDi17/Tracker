@@ -2,8 +2,6 @@
 //  LaunchScreenViewController.swift
 //  Tracker
 //
-//  Created by Анна Лапухина on 15.11.2025.
-//
 
 import UIKit
 
@@ -19,5 +17,4 @@ class LaunchScreenViewController: UIViewController {
             logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
     }
-    // MARK: - Navigation
 }
