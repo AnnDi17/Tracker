@@ -361,6 +361,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         cell.config(description: tracker.name, emoji: tracker.emoji, color: tracker.color, daysCount: daysCount, isCompleted: isCompleted)
         cell.onButtonTap = { [weak self] in
             guard let self else {return}
+            if self.currentDate > Date() {return}
             if isCompleted {
                 let newCompletedTrackers = self.completedTrackers.filter{ $0.id != tracker.id || $0.date != self.currentDate}
                 self.completedTrackers = newCompletedTrackers
