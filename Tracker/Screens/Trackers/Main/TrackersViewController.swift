@@ -201,7 +201,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.delegate = self
         trackersCollectionView.dataSource = self
         trackersCollectionView.register(TrackersCollectionViewCell.self, forCellWithReuseIdentifier: TrackersCollectionViewCell.reuseIdentifier)
-        trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.reuseIdentifier)
+        trackersCollectionView.register(TrackersSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier)
     }
     
     private func createDatePickerContainer() -> UIView{
@@ -336,9 +336,9 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             return UICollectionReusableView()
         }
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                                   withReuseIdentifier: SectionHeaderView.reuseIdentifier,
+                                                                   withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier,
                                                                    for: indexPath)
-        if let header = view as? SectionHeaderView {
+        if let header = view as? TrackersSectionHeaderView {
             let title = currentCategories[safe:indexPath.section]?.title ?? ""
             header.configure(title: title)
         }
