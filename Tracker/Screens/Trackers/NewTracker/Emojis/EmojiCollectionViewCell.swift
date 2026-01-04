@@ -32,6 +32,17 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     }
     
     func config(with text: String){
+        emojiLabel.layer.cornerRadius = 16
+        emojiLabel.clipsToBounds = true
+        emojiLabel.backgroundColor = .clear
         emojiLabel.text = text
+    }
+    
+    func didSelect(){
+        emojiLabel.backgroundColor = .TrLightGray
+    }
+    
+    func didDeselect(){
+        emojiLabel.backgroundColor = .clear
     }
 }

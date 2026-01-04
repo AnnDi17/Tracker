@@ -3,14 +3,16 @@
 //  Tracker
 //
 
-#if DEBUG
+/*#if DEBUG
 import SwiftUI
 
 @available(iOS 17.0, *)
 #Preview {
     NewHabitViewController()
 }
-#endif
+#endif*/
+
+import UIKit
 
 final class NewHabitViewController: UIViewController {
     
@@ -23,9 +25,11 @@ final class NewHabitViewController: UIViewController {
     private let emojiCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
-    private var days: [WeekDay] = []
-    private var category: String = "Важное"
-    private var name: String = ""
+    private var trackerDays: [WeekDay] = []
+    private var trackerCategory: String = "Важное"
+    private var trackerEmoji: String = "😀"
+    private var trackerColor: UIColor = .TrBlue
+    
     private var emojis: [String] = [
         "😀", "😇", "😂", "😍", "🥳", "😎", "😴", "🤔", "🤩",
         "🚀", "🎉", "🔥", "🌟", "⚡️", "🍀", "🍎", "🍩",
@@ -52,7 +56,6 @@ final class NewHabitViewController: UIViewController {
         UIColor(red: 210/255, green: 105/255, blue: 30/255,  alpha: 1),
         UIColor(red: 112/255, green: 128/255, blue: 144/255, alpha: 1)
     ]
-    private var trackerColor: UIColor = .TrBlue
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -171,6 +174,8 @@ final class NewHabitViewController: UIViewController {
     private func setupEmojiCollectionView(){
         emojiCollectionView.delegate = self
         emojiCollectionView.dataSource = self
+        emojiCollectionView.allowsSelection = true
+        emojiCollectionView.allowsMultipleSelection = false
         emojiCollectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: EmojiCollectionViewCell.reuseIdentifier)
         emojiCollectionView.register(EmojiSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: EmojiSectionHeaderView.reuseIdentifier)
     }
@@ -178,6 +183,8 @@ final class NewHabitViewController: UIViewController {
     private func setupColorCollectionView(){
         colorsCollectionView.delegate = self
         colorsCollectionView.dataSource = self
+        colorsCollectionView.allowsSelection = true
+        colorsCollectionView.allowsMultipleSelection = false
         colorsCollectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.reuseIdentifier)
         colorsCollectionView.register(ColorSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: ColorSectionHeaderView.reuseIdentifier)
     }
@@ -231,10 +238,10 @@ final class NewHabitViewController: UIViewController {
             id: UUID(),
             name: name,
             color: trackerColor,
-            emoji: emojis[0],
-            schedule: days
+            emoji: trackerEmoji,
+            schedule: trackerDays
         )
-        createHabit?(newTracker, category)
+        createHabit?(newTracker, trackerCategory)
         dismiss(animated: true, completion: nil)
     }
     
@@ -247,24 +254,24 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = settingsTableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.reuseIdentifier, for: indexPath) as? SettingsTableViewCell else {
-            print("Error dequeuing cell")
+            print("NewHabitViewController.tableView: Error dequeuing cell")
             return UITableViewCell()
         }
         
         var daysString = ""
-        let daysCount = days.count
+        let daysCount = trackerDays.count
         if daysCount > 0 && daysCount != 7 {
             for dayNumber in 0..<daysCount-1 {
-                daysString.append("\((days[dayNumber].day)), ")
+                daysString.append("\((trackerDays[dayNumber].day)), ")
             }
-            daysString.append(days[daysCount-1].day)
+            daysString.append(trackerDays[daysCount-1].day)
         }
         
         if daysCount == 7 {
             daysString = "Каждый день"
         }
         
-        let description = indexPath.row == 0 ? category : daysString
+        let description = indexPath.row == 0 ? trackerCategory : daysString
         
         cell.config(with: indexPath.row == 0 ? "Категория" : "Расписание",description)
         return cell
@@ -278,7 +285,7 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         if indexPath.row == 1 {
             let vc = ScheduleViewController()
             vc.daysDidSelect = {[weak self] days in
-                self?.days = days
+                self?.trackerDays = days
                 self?.settingsTableView.reloadRows(at: [indexPath], with: .automatic)
             }
             present(vc, animated: true)
@@ -337,14 +344,14 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
         switch collectionView {
         case emojiCollectionView:
             guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: EmojiSectionHeaderView.reuseIdentifier, for: indexPath) as? EmojiSectionHeaderView else {
-                print("collectionView: could not create Header View")
+                print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
             headerView.config(with: "Emoji")
             return headerView
         case colorsCollectionView:
             guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ColorSectionHeaderView.reuseIdentifier, for: indexPath) as? ColorSectionHeaderView else {
-                print("collectionView: could not create Header View")
+                print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
             headerView.config(with: "Цвет")
@@ -358,20 +365,48 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
         switch collectionView {
         case emojiCollectionView:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCollectionViewCell.reuseIdentifier, for: indexPath) as? EmojiCollectionViewCell else {
-                print("collectionView: could not create cell")
+                print("NewHabitViewController.collectionView: could not create cell")
                 return UICollectionViewCell()
             }
             cell.config(with: emojis[indexPath.row])
             return cell
         case colorsCollectionView:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCollectionViewCell.reuseIdentifier, for: indexPath) as? ColorCollectionViewCell else {
-                print("collectionView: could not create cell")
+                print("NewHabitViewController.collectionView: could not create cell")
                 return UICollectionViewCell()
             }
             cell.config(with: colors[indexPath.row])
             return cell
         default:
             return UICollectionViewCell()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch collectionView {
+        case emojiCollectionView:
+            trackerEmoji = emojis[indexPath.row]
+            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
+            cell.didSelect()
+        case colorsCollectionView:
+            trackerColor = colors[indexPath.row]
+            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
+            cell.didSelect()
+        default:
+            break
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        switch collectionView {
+        case emojiCollectionView:
+            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
+            cell.didDeselect()
+        case colorsCollectionView:
+            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
+            cell.didDeselect()
+        default:
+            break
         }
     }
 }
@@ -386,7 +421,7 @@ extension NewHabitViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return 0
+        return 5
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -409,16 +444,16 @@ extension NewHabitViewController: UICollectionViewDelegateFlowLayout {
         return CGSize(width: collectionView.bounds.width, height: height)
     }
     
-    private func getNumberOfLines(leftBorder: CGFloat, rightBorder: CGFloat, numberOfItems: Int, itemWidth: CGFloat) -> Int{
-        let totalWidth = view.bounds.width - leftBorder - rightBorder
-        let itemsInLine = Int(totalWidth/itemWidth)
+    private func getNumberOfLines(leftBorder: CGFloat, rightBorder: CGFloat, numberOfItems: Int, itemWidth: CGFloat, interItemSpace: CGFloat) -> Int{
+        let totalWidth = view.bounds.width - leftBorder - rightBorder + interItemSpace
+        let itemsInLine = Int(totalWidth/(itemWidth + interItemSpace))
         let lines = (numberOfItems + itemsInLine - 1) / itemsInLine
         return lines
     }
     
     private func getHeightForCollectionView(numberOfItems: Int) -> CGFloat{
         let headerHeight = getHeightForHeader()
-        let totalLines = getNumberOfLines(leftBorder: 18, rightBorder: 18, numberOfItems: numberOfItems, itemWidth: 52)
+        let totalLines = getNumberOfLines(leftBorder: 18, rightBorder: 18, numberOfItems: numberOfItems, itemWidth: 52, interItemSpace: 5)
         let totalHeight = CGFloat(52*totalLines) + headerHeight + 24 + 24
         return totalHeight
     }

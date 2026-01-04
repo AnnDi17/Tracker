@@ -32,5 +32,18 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     
     func config(with color: UIColor){
         colorView.backgroundColor = color
+        contentView.layer.borderWidth = 3
+        contentView.layer.cornerRadius = 8
+        contentView.clipsToBounds = true
+        contentView.layer.borderColor = UIColor.clear.cgColor
+    }
+    
+    func didSelect(){
+        let color = colorView.backgroundColor ?? UIColor.clear
+        contentView.layer.borderColor = color.withAlphaComponent(0.3).cgColor
+    }
+    
+    func didDeselect(){
+        contentView.layer.borderColor = UIColor.clear.cgColor
     }
 }
