@@ -21,7 +21,7 @@ final class NewHabitViewController: UIViewController {
     private let settingsTableView = UITableView()
     private let nameTextField = PaddedTextField()
     private let errorLabel = UILabel()
-    private var errorHeightConstraint: NSLayoutConstraint!
+    private var errorHeightConstraint: NSLayoutConstraint?
     private let emojiCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
@@ -157,8 +157,8 @@ final class NewHabitViewController: UIViewController {
         errorLabel.textColor = .TrRed
         errorLabel.textAlignment = .center
         errorLabel.isHidden = true
-        errorHeightConstraint = errorLabel.heightAnchor.constraint(equalToConstant: 0)
-        errorHeightConstraint.isActive = true
+        errorHeightConstraint? = errorLabel.heightAnchor.constraint(equalToConstant: 0)
+        errorHeightConstraint?.isActive = true
     }
     
     private func setupSettingsTableView(){
@@ -312,12 +312,12 @@ extension NewHabitViewController: UITextFieldDelegate {
         
         if newText.count > 38 {
             errorLabel.isHidden = false
-            errorHeightConstraint.isActive = false
+            errorHeightConstraint?.isActive = false
             return false
         }
         
         errorLabel.isHidden = true
-        errorHeightConstraint.isActive = true
+        errorHeightConstraint?.isActive = true
         return true
     }
 }

@@ -8,7 +8,7 @@ import CoreData
 final class TrackerStore: NSObject{
     
     private let context: NSManagedObjectContext
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
     
     weak var delegate: TrackerStoreDelegate?
     
@@ -32,13 +32,18 @@ final class TrackerStore: NSObject{
     }
     
     convenience override init() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { fatalError("TrackerStore: Can't get AppDelegate") }
         let context = appDelegate.persistentContainer.viewContext
-        try! self.init(context: context)
+        do{
+            try self.init(context: context)
+        }
+        catch {
+            fatalError("TrackerStore: Can't init TrackerStore: \(error)")
+        }
     }
     
     func getTrackers() -> [TrackerCategory]{
-        guard let sections = fetchedResultsController.sections else { return [] }
+        guard let sections = fetchedResultsController?.sections else { return [] }
         var categories: [TrackerCategory] = []
         for сategoryData in sections {
             let title = сategoryData.name
@@ -71,12 +76,23 @@ final class TrackerStore: NSObject{
     }
     
     private func trackerFromCoreData(_ data: TrackerCoreData) -> Tracker {
-        guard let id = data.trackerId else { fatalError("No ID on \(data)") }
-        guard let name = data.name else { fatalError("No name on \(data)") }
-        guard let colorHex = data.color else { fatalError("No color on \(data)") }
-        guard let emoji = data.emoji else { fatalError("No emoji on \(data)") }
-        guard let scheduleData = data.schedule else { fatalError("No schedule on \(data)") }
-        guard let schedule = ScheduleTransformer().reverseTransformedValue(scheduleData) as? [WeekDay] else { fatalError("Schedule is not in correct format on \(data)") }
+        guard
+            let id = data.trackerId,
+            let name = data.name ,
+            let colorHex = data.color,
+            let emoji = data.emoji,
+            let scheduleData = data.schedule,
+            let schedule = ScheduleTransformer().reverseTransformedValue(scheduleData) as? [WeekDay]
+        else {
+            assertionFailure("TrackerStore.trackerFromCoreData: invalid data \(data)")
+            return Tracker(
+                id: UUID(),
+                name: "",
+                color: .clear,
+                emoji: "",
+                schedule: []
+            )
+        }
         
         let color = UIColorMarshalling.color(from: colorHex)
         

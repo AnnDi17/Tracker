@@ -14,7 +14,10 @@ final class TrackerCategoryStore{
     }
     
     convenience init() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else {
+            fatalError("TrackerCategoryStore: error getting AppDelegate")
+        }
         let context = appDelegate.persistentContainer.viewContext
         self.init(context: context)
     }

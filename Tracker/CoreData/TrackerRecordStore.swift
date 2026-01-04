@@ -14,7 +14,10 @@ final class TrackerRecordStore{
     }
     
     convenience init() {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("TrackerRecordStore: can't get AppDelegate")
+        }
         let context = appDelegate.persistentContainer.viewContext
         self.init(context: context)
     }
@@ -54,9 +57,13 @@ final class TrackerRecordStore{
         }
     }
     
-    private func trackerRecordFromCoreData(_ data: TrackerRecordCoreData) -> TrackerRecord {
-        guard let id = data.trackerId else { fatalError("id is nil") }
-        guard let date = data.date else { fatalError("date is nil") }
+    private func trackerRecordFromCoreData (_ data: TrackerRecordCoreData) -> TrackerRecord {
+        guard let id = data.trackerId, let date = data.date else
+        {
+            assertionFailure("TrackerRecordStore.trackerRecordFromCoreData: id or date is nil")
+            return TrackerRecord(id: UUID(), date: Date().normDate)
+            
+        }
         let trackerRecord = TrackerRecord(id: id, date: date)
         return trackerRecord
     }
