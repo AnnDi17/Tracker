@@ -1,13 +1,13 @@
 //
-//  SectionHeaderView.swift
+//  TrackersSectionHeaderView.swift
 //  Tracker
 //
 
 
 import UIKit
 
-final class SectionHeaderView: UICollectionReusableView {
-    static let reuseIdentifier = "SectionHeaderView"
+final class TrackersSectionHeaderView: UICollectionReusableView {
+    static let reuseIdentifier = "TrackersSectionHeaderView"
 
     private let titleLabel = UILabel()
 
