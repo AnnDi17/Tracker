@@ -11,17 +11,21 @@ final class TrackersViewController: UIViewController {
     private let trackersCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let contentContainer = UIView()
     
-    var categories: [TrackerCategory] = []
-    var completedTrackers: [TrackerRecord] = []
-    var currentCompletedTrackerIds: Set<UUID> = []
-    var currentCategories: [TrackerCategory] = [] {
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerStore = TrackerStore()
+    private let trackerRecordStore = TrackerRecordStore()
+    
+    private var categories: [TrackerCategory] = []
+    private var completedTrackers: [TrackerRecord] = []
+    private var currentCompletedTrackerIds: Set<UUID> = []
+    private var currentCategories: [TrackerCategory] = [] {
         didSet {
             updateEmptyState()
             trackersCollectionView.reloadData()
         }
     }
     
-    var currentDate = Date()
+    private var currentDate = Date().normDate
     
     private lazy var dateFormatter: DateFormatter = {
         let df = DateFormatter()
@@ -35,10 +39,19 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .TrWhiteDay
+        trackerStore.delegate = self
         
-        createTestCategory()
+        categories = trackerStore.getTrackers()
+        
+        do {
+            completedTrackers = try trackerRecordStore.fetchAll()
+        }
+        catch {
+            print("TrackersViewController.viewDidLoad: failed to fetch completed trackers - \(error)")
+        }
         
         currentCategories = getTrackersOnDate(currentDate)
+        
         currentCompletedTrackerIds = Set(
             completedTrackers
                 .filter{$0.date == currentDate}
@@ -101,52 +114,34 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
-    private func createTestCategory(){
-        let days1: [WeekDay] = [.mon, .fri, .sat]
-        let days2: [WeekDay] = [.sat]
-        let trackers1 = [
-            Tracker(
-                id: UUID(),
-                name: "Поливать растения",
-                color: UIColor(red: 51/255, green: 207/255, blue: 105/255, alpha: 1),
-                emoji: "🌿",
-                schedule: days1
-            ),
-            Tracker(
-                id: UUID(),
-                name: "Вычесать кота",
-                color: UIColor(red: 255/255, green: 136/255, blue: 30/255, alpha: 1),
-                emoji: "😺",
-                schedule: days2
-            )
-        ]
-
-        let testCategory1 = TrackerCategory(
-            title: "Домашние дела",
-            trackers: trackers1
-        )
-        categories.append(testCategory1)
-    }
-    
     // MARK: - Actions
     @objc private func addButtonTapped() {
         let vc = NewHabitViewController()
         vc.createHabit = { [weak self] tracker, category in
             guard let self else {return}
-            var trackers = self.categories.first(where: {$0.title == category})?.trackers ?? []
-            trackers.append(tracker)
-            var newCategories = self.categories.filter({$0.title != category})
-            let newCategory = TrackerCategory(title: category, trackers: trackers)
-            newCategories.append(newCategory)
-            self.categories = newCategories
-            self.currentCategories = getTrackersOnDate(currentDate)
+            do {
+                let isCategoryExist = try self.trackerCategoryStore.isExistingCategory(withTitle: category)
+                if !isCategoryExist {
+                    try trackerCategoryStore.addToStore(category)
+                }
+            }
+            catch {
+                print("createHabit: failed to check is category exist - \(error)")
+                return
+            }
+            do {
+                try trackerStore.addToStore(tracker, categoryName: category)
+            }
+            catch {
+                print("createHabit: failed to add tracker to store - \(error)")
+            }
         }
         present(vc,animated: true)
     }
     
     @objc private func dateChanged(_ sender: UIDatePicker) {
         updateDateLabelText(with: sender.date)
-        currentDate = sender.date
+        currentDate = sender.date.normDate
         currentCategories = getTrackersOnDate(currentDate)
         currentCompletedTrackerIds = Set(
             completedTrackers
@@ -201,7 +196,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.delegate = self
         trackersCollectionView.dataSource = self
         trackersCollectionView.register(TrackersCollectionViewCell.self, forCellWithReuseIdentifier: TrackersCollectionViewCell.reuseIdentifier)
-        trackersCollectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.reuseIdentifier)
+        trackersCollectionView.register(TrackersSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier)
     }
     
     private func createDatePickerContainer() -> UIView{
@@ -336,9 +331,9 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
             return UICollectionReusableView()
         }
         let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                                   withReuseIdentifier: SectionHeaderView.reuseIdentifier,
+                                                                   withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier,
                                                                    for: indexPath)
-        if let header = view as? SectionHeaderView {
+        if let header = view as? TrackersSectionHeaderView {
             let title = currentCategories[safe:indexPath.section]?.title ?? ""
             header.configure(title: title)
         }
@@ -347,7 +342,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier:  TrackersCollectionViewCell.reuseIdentifier, for: indexPath) as? TrackersCollectionViewCell else {
-            print("collectionView: couldn't create cell")
+            print("TrackersViewController.collectionView: couldn't create cell")
             return UICollectionViewCell()
         }
         configCell(cell, for: indexPath)
@@ -361,18 +356,30 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         cell.config(description: tracker.name, emoji: tracker.emoji, color: tracker.color, daysCount: daysCount, isCompleted: isCompleted)
         cell.onButtonTap = { [weak self] in
             guard let self else {return}
-            if self.currentDate > Date() {return}
+            if self.currentDate > Date().normDate {return}
             if isCompleted {
                 let newCompletedTrackers = self.completedTrackers.filter{ $0.id != tracker.id || $0.date != self.currentDate}
                 self.completedTrackers = newCompletedTrackers
-                currentCompletedTrackerIds.remove(tracker.id)
+                self.currentCompletedTrackerIds.remove(tracker.id)
+                do{
+                    try self.trackerRecordStore.deleteFromStore(trackerId: tracker.id, date: self.currentDate)
+                }
+                catch {
+                    print("onButtonTap: error deleting tracker record - \(error)")
+                }
             } else {
                 let trackerRecord = TrackerRecord(
                     id: tracker.id,
                     date: self.currentDate
                 )
                 self.completedTrackers.append(trackerRecord)
-                currentCompletedTrackerIds.insert(tracker.id)
+                self.currentCompletedTrackerIds.insert(tracker.id)
+                do{
+                    try self.trackerRecordStore.addToStore(trackerRecord)
+                }
+                catch {
+                    print("onButtonTap: error saving tracker record - \(error)")
+                }
             }
             self.trackersCollectionView.reloadItems(at: [indexPath])
         }
@@ -418,5 +425,12 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         let lineHeight = UIFont.systemFont(ofSize: 19, weight: .bold).lineHeight
         let height = top + lineHeight + bottom
         return CGSize(width: collectionView.bounds.width, height: height)
+    }
+}
+
+extension TrackersViewController: TrackerStoreDelegate {
+    func store(_ store: TrackerStore) {
+        categories = trackerStore.getTrackers()
+        currentCategories = getTrackersOnDate(currentDate)
     }
 }

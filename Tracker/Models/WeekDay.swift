@@ -3,7 +3,7 @@
 //  Tracker
 //
 
-enum WeekDay: Int {
+enum WeekDay: Int, Codable {
     case mon = 1,
          tue = 2,
          wed = 3,
