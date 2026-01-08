@@ -41,6 +41,8 @@ final class TrackersViewController: UIViewController {
         view.backgroundColor = .TrWhiteDay
         trackerStore.delegate = self
         
+        NotificationCenter.default.addObserver(self, selector: #selector(handleCategoryChange), name: .trackerCategoryDidChange, object: nil)
+        
         categories = trackerStore.getTrackers()
         
         do {
@@ -114,6 +116,10 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .trackerCategoryDidChange, object: nil)
+    }
+    
     // MARK: - Actions
     @objc private func addButtonTapped() {
         let vc = NewHabitViewController()
@@ -148,6 +154,10 @@ final class TrackersViewController: UIViewController {
                 .filter{$0.date == currentDate}
                 .map{$0.id}
         )
+    }
+    
+    @objc private func handleCategoryChange() {
+        trackerStore.refetch()
     }
     
     // MARK: - Helpers
@@ -434,3 +444,4 @@ extension TrackersViewController: TrackerStoreDelegate {
         currentCategories = getTrackersOnDate(currentDate)
     }
 }
+

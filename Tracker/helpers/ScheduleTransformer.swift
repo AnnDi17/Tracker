@@ -8,14 +8,19 @@ import UIKit
 
 final class ScheduleTransformer {
     
-    func transformedValue(_ value: Any?) -> Any? {
+    static func transformedValue(_ value: Any?) -> Any? {
         guard let days = value as? [WeekDay] else { return nil }
         return try? JSONEncoder().encode(days)
     }
     
-    func reverseTransformedValue(_ value: Any?) -> Any? {
-        guard let data = value as? NSData else { return nil }
-        return try? JSONDecoder().decode([WeekDay].self, from: data as Data)
+    static func reverseTransformedValue(_ value: Any?) -> Any? {
+        if let data = value as? Data {
+            return try? JSONDecoder().decode([WeekDay].self, from: data)
+        }
+        if let data = value as? NSData {
+            return try? JSONDecoder().decode([WeekDay].self, from: data as Data)
+        }
+        return nil
     }
     
 }

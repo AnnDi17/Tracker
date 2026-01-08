@@ -2,8 +2,6 @@
 //  TrackerUITestsLaunchTests.swift
 //  TrackerUITests
 //
-//  Created by Анна Лапухина on 11.11.2025.
-//
 
 import XCTest
 

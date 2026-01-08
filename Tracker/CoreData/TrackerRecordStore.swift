@@ -25,7 +25,7 @@ final class TrackerRecordStore{
     func fetchAll() throws -> [TrackerRecord] {
         let request = TrackerRecordCoreData.fetchRequest()
         let data = try context.fetch(request)
-        return data.map({self.trackerRecordFromCoreData($0)})
+        return data.map{trackerRecordFromCoreData($0)}
     }
     
     func addToStore(_ trackerRecord: TrackerRecord) throws {

@@ -60,7 +60,7 @@ final class TrackerStore: NSObject{
         newTracker.name = tracker.name
         newTracker.color = UIColorMarshalling.hexString(from:tracker.color)
         newTracker.emoji = tracker.emoji
-        let data = ScheduleTransformer().transformedValue(tracker.schedule) as? Data
+        let data = ScheduleTransformer.transformedValue(tracker.schedule) as? Data
         newTracker.schedule = data
         let request = TrackerCategoryCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "%K == %@",#keyPath(TrackerCategoryCoreData.title), categoryName)
@@ -75,6 +75,15 @@ final class TrackerStore: NSObject{
         try context.save()
     }
     
+    func refetch() {
+        do {
+            try fetchedResultsController?.performFetch()
+            delegate?.store(self)
+        } catch {
+            print("TrackerStore.refetch: performFetch failed - \(error)")
+        }
+    }
+    
     private func trackerFromCoreData(_ data: TrackerCoreData) -> Tracker {
         guard
             let id = data.trackerId,
@@ -82,7 +91,7 @@ final class TrackerStore: NSObject{
             let colorHex = data.color,
             let emoji = data.emoji,
             let scheduleData = data.schedule,
-            let schedule = ScheduleTransformer().reverseTransformedValue(scheduleData) as? [WeekDay]
+            let schedule = ScheduleTransformer.reverseTransformedValue(scheduleData) as? [WeekDay]
         else {
             assertionFailure("TrackerStore.trackerFromCoreData: invalid data \(data)")
             return Tracker(
@@ -112,3 +121,4 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
         delegate?.store(self)
     }
 }
+
