@@ -11,15 +11,16 @@ enum WeekDay: Int, Codable {
          fri = 5,
          sat = 6,
          sun = 7
+    
     var day: String {
         switch self {
-        case .mon: return "Пн"
-        case .tue: return "Вт"
-        case .wed: return "Ср"
-        case .thu: return "Чт"
-        case .fri: return "Пт"
-        case .sat: return "Сб"
-        case .sun: return "Вск"
+        case .mon: "Пн"
+        case .tue: "Вт"
+        case .wed: "Ср"
+        case .thu: "Чт"
+        case .fri: "Пт"
+        case .sat: "Сб"
+        case .sun: "Вск"
         }
     }
 }

@@ -13,6 +13,11 @@ extension UIColor{
     static let TrLightGray = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 1)
     static let TrBackgroundDay = UIColor(red: 230/255, green: 232/255, blue: 235/255, alpha: 0.3)
     static let TrRed = UIColor(red: 245/255, green: 107/255, blue: 108/255, alpha: 1)
+    
+    static let TrSystemRed = UIColor(red: 255/255, green: 69/255, blue: 58/255, alpha: 1)
+    static let TrSystemBlue = UIColor(red: 0/255, green: 122/255, blue: 255/255, alpha: 1)
+    static let TrSeparatorColor = UIColor(red: 60/255, green: 60/255, blue: 67/255, alpha: 0.36)
+    
 }
 
 

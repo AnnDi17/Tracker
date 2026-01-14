@@ -91,7 +91,7 @@ extension ScheduleViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = daysTableView.dequeueReusableCell(withIdentifier: DaysTableViewCell.reuseIdentifier, for: indexPath) as? DaysTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: DaysTableViewCell.reuseIdentifier, for: indexPath) as? DaysTableViewCell else {
             print("ScheduleViewController.tableView: Error dequeuing cell")
             return UITableViewCell()
         }

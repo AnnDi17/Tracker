@@ -26,17 +26,17 @@ final class NewHabitViewController: UIViewController {
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     
     private var trackerDays: [WeekDay] = []
-    private var trackerCategory: String = "Важное"
-    private var trackerEmoji: String = "😀"
+    private var trackerCategory: String = ""
+    private var trackerEmoji: String = ""
     private var trackerColor: UIColor = .TrBlue
     
-    private var emojis: [String] = [
+    private let emojis: [String] = [
         "😀", "😇", "😂", "😍", "🥳", "😎", "😴", "🤔", "🤩",
         "🚀", "🎉", "🔥", "🌟", "⚡️", "🍀", "🍎", "🍩",
         "🍕", "🥑", "🌳", "🌞", "🌙", "🐶", "🐱", "🦄", "🐢",
         "🎨", "🎸", "🎧", "🏆", "📚", "💡", "❤️", "🧠"
     ]
-    private var colors: [UIColor] = [
+    private let colors: [UIColor] = [
         UIColor(red: 255/255, green: 69/255,  blue: 58/255,  alpha: 1),
         UIColor(red: 255/255, green: 159/255, blue: 10/255,  alpha: 1),
         UIColor(red: 255/255, green: 214/255, blue: 10/255,  alpha: 1),
@@ -253,7 +253,7 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = settingsTableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.reuseIdentifier, for: indexPath) as? SettingsTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: SettingsTableViewCell.reuseIdentifier, for: indexPath) as? SettingsTableViewCell else {
             print("NewHabitViewController.tableView: Error dequeuing cell")
             return UITableViewCell()
         }
@@ -282,6 +282,16 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 0 {
+            let vc = CategoriesViewController()
+            vc.selectedCategory = trackerCategory
+            vc.categoryDidSelect = {[weak self] category in
+                self?.trackerCategory = category
+                self?.settingsTableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+            present(vc, animated: true)
+        }
+        
         if indexPath.row == 1 {
             let vc = ScheduleViewController()
             vc.daysDidSelect = {[weak self] days in
@@ -325,12 +335,9 @@ extension NewHabitViewController: UITextFieldDelegate {
 extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView {
-        case emojiCollectionView:
-            return emojis.count
-        case colorsCollectionView:
-            return colors.count
-        default:
-            return 0
+        case emojiCollectionView: emojis.count
+        case colorsCollectionView: colors.count
+        default: 0
         }
     }
     
