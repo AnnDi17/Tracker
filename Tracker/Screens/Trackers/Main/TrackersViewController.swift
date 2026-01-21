@@ -258,7 +258,7 @@ final class TrackersViewController: UIViewController {
     
     private func createTitleLabel() -> UILabel {
         let titleLabel = UILabel()
-        titleLabel.text = "Трекеры"
+        titleLabel.text = NSLocalizedString("trackers_title", comment: "text for trackers view controller title")//"Трекеры"
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         titleLabel.textColor = .black
         return titleLabel
@@ -280,7 +280,7 @@ final class TrackersViewController: UIViewController {
         textField.textColor = .TrBlackDay
         textField.leftView?.tintColor = .TrGray
         textField.attributedPlaceholder = NSAttributedString(
-            string: "Поиск",
+            string: NSLocalizedString("search", comment: "text field placeholder"),//"Поиск",
             attributes: [
                 .foregroundColor: UIColor.TrGray,
                 .font: UIFont.systemFont(ofSize: 17)
@@ -302,7 +302,7 @@ final class TrackersViewController: UIViewController {
         imageView.image = UIImage(resource: .dizzy)
         
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .TrBlackDay
         let container = UIView()

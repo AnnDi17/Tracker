@@ -135,7 +135,8 @@ final class NewHabitViewController: UIViewController {
     
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
-        label.text = "Новая привычка"
+        //label.text = "Новая привычка"
+        label.text = NSLocalizedString("new_habit_title", comment: "text displayed in the title label of the new habit view controller")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .TrBlackDay
         return label
@@ -143,7 +144,7 @@ final class NewHabitViewController: UIViewController {
     
     private func setupNameTextField(){
         nameTextField.padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        nameTextField.placeholder = "Введите название трекера"
+        nameTextField.placeholder = NSLocalizedString("enter_tracker_name", comment: "text displayed in the name text field placeholder")//"Введите название трекера"
         nameTextField.layer.cornerRadius = 16
         nameTextField.backgroundColor = .TrBackgroundDay
         
@@ -152,7 +153,7 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func setupErrorLabel(){
-        errorLabel.text = "Ограничение 38 символов"
+        errorLabel.text = NSLocalizedString("limit_38_char", comment: "text displayed in the error label")//"Ограничение 38 символов"
         errorLabel.font = UIFont.systemFont(ofSize: 17)
         errorLabel.textColor = .TrRed
         errorLabel.textAlignment = .center
@@ -203,7 +204,7 @@ final class NewHabitViewController: UIViewController {
     private func getCreateButton() -> UIButton{
         let button = UIButton()
         button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(NSLocalizedString("create", comment: "text for create button"), for: .normal)
         button.setTitleColor(UIColor.TrWhiteDay, for: .normal)
         button.backgroundColor = .TrGray
         button.layer.cornerRadius = 16
@@ -214,7 +215,7 @@ final class NewHabitViewController: UIViewController {
     private func getCancelButton() -> UIButton{
         let button = UIButton()
         button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("cancel", comment: "text for cancel button"), for: .normal)
         button.setTitleColor(UIColor.TrRed, for: .normal)
         button.backgroundColor = .clear
         button.layer.cornerRadius = 16
@@ -268,12 +269,12 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         if daysCount == 7 {
-            daysString = "Каждый день"
+            daysString = NSLocalizedString("every_day", comment: "text for schedule")//"Каждый день"
         }
         
         let description = indexPath.row == 0 ? trackerCategory : daysString
         
-        cell.config(with: indexPath.row == 0 ? "Категория" : "Расписание",description)
+        cell.config(with: indexPath.row == 0 ? NSLocalizedString("category", comment: "") : NSLocalizedString("schedule", comment: ""),description)
         return cell
     }
     
@@ -354,14 +355,14 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
                 print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
-            headerView.config(with: "Emoji")
+            headerView.config(with: NSLocalizedString("emoji", comment: "text for emoji section header"))
             return headerView
         case colorsCollectionView:
             guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ColorSectionHeaderView.reuseIdentifier, for: indexPath) as? ColorSectionHeaderView else {
                 print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
-            headerView.config(with: "Цвет")
+            headerView.config(with: NSLocalizedString("color", comment: "text for color section header"))
             return headerView
         default:
             return UICollectionReusableView()

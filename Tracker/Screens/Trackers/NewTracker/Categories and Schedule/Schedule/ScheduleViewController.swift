@@ -55,7 +55,7 @@ final class ScheduleViewController: UIViewController {
     
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
-        label.text = "Расписание"
+        label.text = NSLocalizedString("schedule", comment: "text for schedule")//"Расписание"
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .TrBlackDay
         return label
@@ -64,7 +64,7 @@ final class ScheduleViewController: UIViewController {
     private func getOkButton() -> UIButton{
         let button = UIButton()
         button.addTarget(self, action: #selector(okButtonTapped), for: .touchUpInside)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("done", comment: "text for ok button"), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         button.setTitleColor(UIColor.TrWhiteDay, for: .normal)
         button.backgroundColor = .TrBlackDay

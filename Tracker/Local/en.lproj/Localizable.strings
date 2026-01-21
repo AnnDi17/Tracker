@@ -1,0 +1,30 @@
+/* 
+  Localizable.strings
+  Tracker
+*/
+
+"new_habit_title" = "New Habit";
+"enter_tracker_name" = "Enter tracker name";
+"limit_38_char" = "Limit of 38 characters";
+"category" = "Category";
+"schedule" = "Schedule";
+"every_day" = "Every day";
+"create" = "Create";
+"cancel" = "Cancel";
+"done" = "Done";
+"emoji" = "Emoji";
+"color" = "Color";
+"enter_category_name" = "Enter category name";
+"search" = "Search";
+"trackers_title" = "Trackers";
+"empty_message" = "What will we be tracking?";
+"onboarding_button" = "Wow, what technology!";
+"statistics_title" = "Statistics";
+
+"weekday_mon" = "Mon";
+"weekday_tue" = "Tue";
+"weekday_wed" = "Wed";
+"weekday_thu" = "Thu";
+"weekday_fri" = "Fri";
+"weekday_sat" = "Sat";
+"weekday_sun" = "Sun";

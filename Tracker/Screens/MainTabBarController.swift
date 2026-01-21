@@ -23,11 +23,11 @@ final class MainTabBarController: UITabBarController {
         
         let inactiveImageStat = UIImage(resource: .barStatInact).withRenderingMode(.alwaysOriginal)
         let activeImageStat = UIImage(resource: .barStatAct).withRenderingMode(.alwaysOriginal)
-        statisticViewController.tabBarItem = UITabBarItem(title: "Статистика", image: inactiveImageStat, selectedImage: activeImageStat)
+        statisticViewController.tabBarItem = UITabBarItem(title: NSLocalizedString("statistics_title", comment: "text for trackers tab bar item"), image: inactiveImageStat, selectedImage: activeImageStat)
         
         let inactiveImageTrack = UIImage(resource: .barTrackInact).withRenderingMode(.alwaysOriginal)
         let activeImageTrack = UIImage(resource: .barTrackAct).withRenderingMode(.alwaysOriginal)
-        trackersNavigationController.tabBarItem = UITabBarItem(title: "Трекеры", image: inactiveImageTrack, selectedImage: activeImageTrack)
+        trackersNavigationController.tabBarItem = UITabBarItem(title: NSLocalizedString("trackers_title", comment: "text for trackers tab bar item"), image: inactiveImageTrack, selectedImage: activeImageTrack)
         
     }
     

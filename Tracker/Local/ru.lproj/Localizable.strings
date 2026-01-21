@@ -1,0 +1,30 @@
+/* 
+  Localizable.strings
+  Tracker
+*/
+
+"new_habit_title" = "Новая привычка";
+"enter_tracker_name" = "Введите название трекера";
+"limit_38_char" = "Ограничение 38 символов";
+"category" = "Категория";
+"schedule" = "Расписание";
+"every_day" = "Каждый день";
+"create" = "Создать";
+"cancel" = "Отменить";
+"done" = "Готово";
+"emoji" = "Emoji";
+"color" = "Цвет";
+"enter_category_name" = "Введите название категории";
+"search" = "Поиск";
+"trackers_title" = "Трекеры";
+"statistics_title" = "Статистика";
+"empty_message" = "Что будем отслеживать?";
+"onboarding_button" = "Вот это технологии!";
+
+"weekday_mon" = "Пн";
+"weekday_tue" = "Вт";
+"weekday_wed" = "Ср";
+"weekday_thu" = "Чт";
+"weekday_fri" = "Пт";
+"weekday_sat" = "Сб";
+"weekday_sun" = "Вск";

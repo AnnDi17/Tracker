@@ -78,7 +78,7 @@ final class CategoriesViewController: UIViewController {
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.text = "Категория"
+        label.text = NSLocalizedString("category", comment:"Text for category label")//"Категория"
         label.textColor = .TrBlackDay
         return label
     }

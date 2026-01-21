@@ -54,7 +54,7 @@ final class DeleteCategorySheetViewController: UIViewController {
             separator.heightAnchor.constraint(equalToConstant: 0.5)
         ])
         
-        cancelButton.setTitle("Отменить", for: .normal)
+        cancelButton.setTitle(NSLocalizedString("cancel", comment: "text for cancel button"), for: .normal)
         cancelButton.setTitleColor(.TrSystemBlue, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
         cancelButton.backgroundColor = .TrWhiteDay
