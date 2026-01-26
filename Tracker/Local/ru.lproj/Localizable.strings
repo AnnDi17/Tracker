@@ -18,7 +18,9 @@
 "search" = "Поиск";
 "trackers_title" = "Трекеры";
 "statistics_title" = "Статистика";
+"statistics_empty_message" = "Анализировать пока нечего";
 "empty_message" = "Что будем отслеживать?";
+"empty_search" = "Ничего не найдено";
 "onboarding_button" = "Вот это технологии!";
 
 "weekday_mon" = "Пн";

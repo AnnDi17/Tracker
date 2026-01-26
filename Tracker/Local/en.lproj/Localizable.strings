@@ -17,9 +17,11 @@
 "enter_category_name" = "Enter category name";
 "search" = "Search";
 "trackers_title" = "Trackers";
-"empty_message" = "What will we be tracking?";
-"onboarding_button" = "Wow, what technology!";
 "statistics_title" = "Statistics";
+"statistics_empty_message" = "Nothing to analyze yet";
+"empty_message" = "What will we be tracking?";
+"empty_search" = "Nothing found";
+"onboarding_button" = "Wow, what technology!";
 
 "weekday_mon" = "Mon";
 "weekday_tue" = "Tue";

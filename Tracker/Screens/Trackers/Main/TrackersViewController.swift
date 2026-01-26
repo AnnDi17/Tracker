@@ -9,7 +9,16 @@ final class TrackersViewController: UIViewController {
     
     private let dateLabel = UILabel()
     private let trackersCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    private let contentContainer = UIView()
+    
+    private let containerForEmptyResult = UIView()
+    private let emptyResultImageView = UIImageView()
+    private let emptyResultLabel = UILabel()
+    
+    private let searchBar = UISearchBar()
+    private var searchBarLeading: NSLayoutConstraint!
+    private var searchBarTrailing: NSLayoutConstraint!
+    private var searchBarTop: NSLayoutConstraint!
+    private var searchBarBottom: NSLayoutConstraint!
     
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerStore = TrackerStore()
@@ -27,6 +36,8 @@ final class TrackersViewController: UIViewController {
     
     private var currentDate = Date().normDate
     
+    private var isEditingSearch = false
+    
     private lazy var dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = Locale(identifier: "ru_RU")
@@ -36,9 +47,27 @@ final class TrackersViewController: UIViewController {
         return df
     }()
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if isEditingSearch { return }
+        let searchTextField = searchBar.searchTextField
+        if searchTextField.bounds.width > 1 && searchTextField.bounds.height > 1 {
+            let insets = searchBar.searchBarFieldInsets()
+            searchBarLeading.constant = -insets.left
+            searchBarTrailing.constant = insets.right
+            searchBarTop.constant = 7-insets.top
+            searchBarBottom.constant = -10+insets.bottom
+        } else {
+           DispatchQueue.main.async { [weak self] in
+                self?.view.setNeedsLayout()
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .TrWhiteDay
+        
         trackerStore.delegate = self
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleCategoryChange), name: .trackerCategoryDidChange, object: nil)
@@ -60,8 +89,6 @@ final class TrackersViewController: UIViewController {
                 .map{$0.id}
         )
         
-        setupTrackersCollectionView()
-        
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
@@ -77,14 +104,18 @@ final class TrackersViewController: UIViewController {
         let headerContainer = UIView()
         headerContainer.backgroundColor = .clear
         let titleLabel = createTitleLabel()
-        let searchBar = createSearchField()
+        setupSearchBar()
         headerContainer.addSubviews([titleLabel, searchBar])
         
-        contentContainer.backgroundColor = .clear
-        let picture = createPictureContainer()
-        contentContainer.addSubviews([picture])
+        setupContainerForEmptyResult()
+        setupTrackersCollectionView()
         
-        view.addSubviews([headerContainer, contentContainer, trackersCollectionView])
+        view.addSubviews([headerContainer, containerForEmptyResult, trackersCollectionView])
+        
+        searchBarLeading = searchBar.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor)
+        searchBarTrailing = searchBar.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor)
+        searchBarTop = searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor)
+        searchBarBottom = searchBar.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor)
         
         NSLayoutConstraint.activate([
             headerContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
@@ -94,20 +125,15 @@ final class TrackersViewController: UIViewController {
             titleLabel.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor),
             
-            searchBar.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 7),
-            searchBar.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor),
-            searchBar.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: -10),
-            searchBar.heightAnchor.constraint(equalToConstant: 36),
+            searchBarTop,
+            searchBarLeading,
+            searchBarTrailing,
+            searchBarBottom,
             
-            contentContainer.topAnchor.constraint(equalTo: headerContainer.bottomAnchor),
-            contentContainer.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            contentContainer.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            contentContainer.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            picture.centerXAnchor.constraint(equalTo: contentContainer.centerXAnchor),
-            picture.centerYAnchor.constraint(equalTo: contentContainer.centerYAnchor),
-            picture.leadingAnchor.constraint(greaterThanOrEqualTo: contentContainer.leadingAnchor),
-            picture.trailingAnchor.constraint(lessThanOrEqualTo: contentContainer.trailingAnchor),
+            containerForEmptyResult.topAnchor.constraint(equalTo: headerContainer.bottomAnchor),
+            containerForEmptyResult.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            containerForEmptyResult.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            containerForEmptyResult.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             trackersCollectionView.topAnchor.constraint(equalTo: headerContainer.bottomAnchor),
             trackersCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
@@ -196,7 +222,7 @@ final class TrackersViewController: UIViewController {
     
     private func updateEmptyState() {
         let isEmpty = currentCategories.isEmpty
-        contentContainer.isHidden = !isEmpty
+        containerForEmptyResult.isHidden = !isEmpty
         trackersCollectionView.isHidden = isEmpty
     }
     
@@ -264,15 +290,15 @@ final class TrackersViewController: UIViewController {
         return titleLabel
     }
     
-    private func createSearchField() -> UISearchBar {
-        let searchBar = UISearchBar()
+    private func setupSearchBar(){
+        searchBar.delegate = self
         
         searchBar.backgroundImage = UIImage()
         searchBar.backgroundColor = .clear
         searchBar.isTranslucent = true
         
         let textField = searchBar.searchTextField
-        textField.translatesAutoresizingMaskIntoConstraints = false
+        
         textField.backgroundColor = UIColor(red: 118/255, green: 118/255, blue: 128/255, alpha: 0.12)
         textField.borderStyle = .none
         textField.layer.cornerRadius = 10
@@ -286,37 +312,38 @@ final class TrackersViewController: UIViewController {
                 .font: UIFont.systemFont(ofSize: 17)
             ]
         )
+    }
+    
+    private func setupContainerForEmptyResult(){
+        containerForEmptyResult.backgroundColor = .clear
+        let picture = createPictureContainer()
+        containerForEmptyResult.addSubviews([picture])
         
         NSLayoutConstraint.activate([
-            textField.leadingAnchor.constraint(equalTo: searchBar.leadingAnchor),
-            textField.trailingAnchor.constraint(equalTo: searchBar.trailingAnchor),
-            textField.topAnchor.constraint(equalTo: searchBar.topAnchor),
-            textField.bottomAnchor.constraint(equalTo: searchBar.bottomAnchor)
+            picture.centerXAnchor.constraint(equalTo: containerForEmptyResult.centerXAnchor),
+            picture.centerYAnchor.constraint(equalTo: containerForEmptyResult.centerYAnchor),
+            picture.leadingAnchor.constraint(greaterThanOrEqualTo: containerForEmptyResult.leadingAnchor),
+            picture.trailingAnchor.constraint(lessThanOrEqualTo: containerForEmptyResult.trailingAnchor)
         ])
-        
-        return searchBar
     }
     
     private func createPictureContainer() -> UIView {
-        let imageView = UIImageView()
-        imageView.image = UIImage(resource: .dizzy)
-        
-        let label = UILabel()
-        label.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .TrBlackDay
+        emptyResultImageView.image = UIImage(resource: .dizzy)
+        emptyResultLabel.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"
+        emptyResultLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        emptyResultLabel.textColor = .TrBlackDay
         let container = UIView()
         container.backgroundColor = .clear
-        container.addSubviews([imageView, label])
+        container.addSubviews([emptyResultImageView, emptyResultLabel])
         
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: container.topAnchor),
-            imageView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            emptyResultImageView.topAnchor.constraint(equalTo: container.topAnchor),
+            emptyResultImageView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
             
-            label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8),
-            label.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            label.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            label.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+            emptyResultLabel.topAnchor.constraint(equalTo: emptyResultImageView.bottomAnchor, constant: 8),
+            emptyResultLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            emptyResultLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            emptyResultLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
         
         return container
@@ -443,5 +470,49 @@ extension TrackersViewController: TrackerStoreDelegate {
         categories = trackerStore.getTrackers()
         currentCategories = getTrackersOnDate(currentDate)
     }
+}
+
+extension TrackersViewController: UISearchBarDelegate {
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        isEditingSearch = true
+        searchBar.setShowsCancelButton(true, animated: true)
+        emptyResultImageView.image = UIImage(resource: .nothing)
+        emptyResultLabel.text = NSLocalizedString("empty_search", comment: "text for empty searching result")//Ничего не найдено
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        isEditingSearch = false
+        searchBar.setShowsCancelButton(false, animated: true)
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        currentCategories = getTrackersOnDate(currentDate)
+        emptyResultImageView.image = UIImage(resource: .dizzy)
+        emptyResultLabel.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        var categoriesAfterFilter: [TrackerCategory] = []
+        guard let searchText = searchBar.text else { return }
+        let сategoriesBeforeFilter = getTrackersOnDate(currentDate)
+        if !searchText.isEmpty {
+            сategoriesBeforeFilter.forEach{ category in
+                let trackers = category.trackers.filter{$0.name.lowercased().contains(searchText.lowercased())}
+                if trackers.count > 0 {
+                    categoriesAfterFilter.append(TrackerCategory(title: category.title, trackers: trackers))
+                }
+            }
+            currentCategories = categoriesAfterFilter
+        } else {
+            currentCategories = сategoriesBeforeFilter
+        }
+    }
+
+}
+
+import SwiftUI
+
+#Preview {
+    TrackersViewController()
 }
 

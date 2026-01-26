@@ -5,6 +5,10 @@
 import UIKit
 import CoreData
 
+extension Notification.Name {
+    static let trackerDidAdd = Notification.Name("trackerDidAdd")
+}
+
 final class TrackerStore: NSObject{
     
     private let context: NSManagedObjectContext
@@ -54,6 +58,17 @@ final class TrackerStore: NSObject{
         return categories
     }
     
+    func hasTrackers() -> Bool{
+        let request = TrackerCoreData.fetchRequest()
+        do{
+            return try context.count(for: request) > 0
+        }
+        catch {
+            print("TrackerStore.hasTrackers: Can't fetch trackers: \(error)")
+            return false
+        }
+    }
+    
     func addToStore(_ tracker: Tracker, categoryName: String) throws{
         let newTracker = TrackerCoreData(context: context)
         newTracker.trackerId = tracker.id
@@ -73,6 +88,7 @@ final class TrackerStore: NSObject{
             newTracker.category = result[0]
         }
         try context.save()
+        NotificationCenter.default.post(name: .trackerDidAdd, object: nil)
     }
     
     func refetch() {
