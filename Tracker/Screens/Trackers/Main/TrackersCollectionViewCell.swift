@@ -10,7 +10,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     var onButtonTap: (()->Void)?
     
-    private var trackerView = UIView()
+    var trackerView = UIView()
     private var emojiLabel = UILabel()
     private var nameLabel = UILabel()
     

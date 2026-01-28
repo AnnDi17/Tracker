@@ -16,6 +16,16 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
+    override var isSelected: Bool{
+        didSet{
+            if isSelected {
+                didSelect()
+            } else {
+                didDeselect()
+            }
+        }
+    }
+    
     override init(frame: CGRect){
         super.init(frame: frame)
         contentView.addSubviews([emojiLabel])
@@ -39,11 +49,11 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
         emojiLabel.text = text
     }
     
-    func didSelect(){
+    private func didSelect(){
         emojiLabel.backgroundColor = .TrLightGray
     }
     
-    func didDeselect(){
+    private func didDeselect(){
         emojiLabel.backgroundColor = .clear
     }
 }

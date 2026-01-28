@@ -1,19 +1,30 @@
 //
-//  DeleteCategorySheetViewController.swift
+//  DeleteItemSheetViewController.swift
 //  Tracker
 //
 
 import UIKit
 
-final class DeleteCategorySheetViewController: UIViewController {
+final class DeleteItemSheetViewController: UIViewController {
     
     private let sheetView = UIView()
     private let messageLabel = UILabel()
     private let deleteButton = UIButton(type: .system)
     private let cancelButton = UIButton(type: .system)
     private let separator = UIView()
+    private let confirmLabelText: String
     
     var onDelete: (() -> Void)?
+    
+    init(confirmLabelText: String, onDelete: (() -> Void)?) {
+        self.confirmLabelText = confirmLabelText
+        self.onDelete = onDelete
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,12 +45,12 @@ final class DeleteCategorySheetViewController: UIViewController {
         sheetView.layer.cornerRadius = 13
         sheetView.layer.masksToBounds = true
         
-        messageLabel.text = "Эта категория точно не нужна?"
+        messageLabel.text = confirmLabelText
         messageLabel.font = .systemFont(ofSize: 13, weight: .regular)
         messageLabel.textColor = UIColor(red: 60/255, green: 60/255, blue: 67/255, alpha: 0.6)
         messageLabel.textAlignment = .center
         
-        deleteButton.setTitle("Удалить", for: .normal)
+        deleteButton.setTitle(NSLocalizedString("delete", comment: "text for delete button"), for: .normal)
         deleteButton.setTitleColor(.TrSystemRed, for: .normal)
         deleteButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         deleteButton.backgroundColor = .clear

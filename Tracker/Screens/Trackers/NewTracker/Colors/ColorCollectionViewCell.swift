@@ -26,6 +26,16 @@ final class ColorCollectionViewCell: UICollectionViewCell {
         ])
     }
     
+    override var isSelected: Bool{
+        didSet{
+            if isSelected {
+                didSelect()
+            } else {
+                didDeselect()
+            }
+        }
+    }
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         nil
@@ -39,12 +49,12 @@ final class ColorCollectionViewCell: UICollectionViewCell {
         contentView.layer.borderColor = UIColor.clear.cgColor
     }
     
-    func didSelect(){
+    private func didSelect(){
         let color = colorView.backgroundColor ?? UIColor.clear
         contentView.layer.borderColor = color.withAlphaComponent(0.3).cgColor
     }
     
-    func didDeselect(){
+    private func didDeselect(){
         contentView.layer.borderColor = UIColor.clear.cgColor
     }
 }

@@ -13,14 +13,19 @@ final class CategoriesViewController: UIViewController {
     private var blurView: UIVisualEffectView?
     private var blurredIndexPath: IndexPath?
     
+    private let containerForEmptyResult = UIView()
+    private let emptyResultImageView = UIImageView()
+    private let emptyResultLabel = UILabel()
+    
     var categoryDidSelect: ((String) -> Void)?
     var selectedCategory: String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         viewModel = CategoriesViewModel()
+        updateEmptyState()
         viewModel?.onCategoriesDidChange = { [weak self] data in
+            self?.updateEmptyState()
             self?.categoriesTableView.reloadData()
         }
         viewModel?.onError = { [weak self] error in
@@ -45,12 +50,20 @@ final class CategoriesViewController: UIViewController {
         let titleLabel = getTitleLabel()
         setupCategoriesTableView()
         let addButton = getAddButton()
-        view.addSubviews([titleLabel, categoriesTableView, addButton])
+        
+        setupContainerForEmptyResult()
+        
+        view.addSubviews([titleLabel, containerForEmptyResult, categoriesTableView, addButton])
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 14),
             titleLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            titleLabel.heightAnchor.constraint(equalToConstant: 49),
+            titleLabel.heightAnchor.constraint(equalToConstant: 50),
+            
+            containerForEmptyResult.topAnchor.constraint(equalTo: titleLabel.bottomAnchor),
+            containerForEmptyResult.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            containerForEmptyResult.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            containerForEmptyResult.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             categoriesTableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
             categoriesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -62,6 +75,43 @@ final class CategoriesViewController: UIViewController {
             addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             addButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+    }
+    
+    private func setupContainerForEmptyResult(){
+        containerForEmptyResult.backgroundColor = .clear
+        let picture = createPictureContainer()
+        containerForEmptyResult.addSubviews([picture])
+        
+        NSLayoutConstraint.activate([
+            picture.centerXAnchor.constraint(equalTo: containerForEmptyResult.centerXAnchor),
+            picture.centerYAnchor.constraint(equalTo: containerForEmptyResult.centerYAnchor),
+            picture.leadingAnchor.constraint(greaterThanOrEqualTo: containerForEmptyResult.leadingAnchor),
+            picture.trailingAnchor.constraint(lessThanOrEqualTo: containerForEmptyResult.trailingAnchor)
+        ])
+    }
+    
+    private func createPictureContainer() -> UIView {
+        emptyResultImageView.image = UIImage(resource: .dizzy)
+        emptyResultLabel.numberOfLines = 0
+        emptyResultLabel.text = NSLocalizedString("empty_categories", comment: "text for empty categories view")
+        emptyResultLabel.textAlignment = .center
+        emptyResultLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        emptyResultLabel.textColor = .TrBlackDay
+        let container = UIView()
+        container.backgroundColor = .clear
+        container.addSubviews([emptyResultImageView, emptyResultLabel])
+        
+        NSLayoutConstraint.activate([
+            emptyResultImageView.topAnchor.constraint(equalTo: container.topAnchor),
+            emptyResultImageView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            
+            emptyResultLabel.topAnchor.constraint(equalTo: emptyResultImageView.bottomAnchor, constant: 8),
+            emptyResultLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            emptyResultLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            emptyResultLabel.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        
+        return container
     }
     
     private func setupCategoriesTableView(){
@@ -139,6 +189,12 @@ final class CategoriesViewController: UIViewController {
         blurView = nil
         blurredIndexPath = nil
     }
+    
+    private func updateEmptyState() {
+        guard let isEmpty = viewModel?.categories.isEmpty else { return }
+        containerForEmptyResult.isHidden = !isEmpty
+        categoriesTableView.isHidden = isEmpty
+    }
 }
 
 extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
@@ -203,8 +259,7 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
             let deleteAction = UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
                 guard let self else { return }
-                let sheet = DeleteCategorySheetViewController()
-                sheet.onDelete = { [weak self] in
+                let sheet = DeleteItemSheetViewController(confirmLabelText: NSLocalizedString("item_delete_confirm_category", comment: "text for confirm label in delete item sheet")){ [weak self] in
                     self?.viewModel?.deleteFromStore(category)
                 }
                 sheet.modalPresentationStyle = .overFullScreen
@@ -230,3 +285,8 @@ extension CategoriesViewController: UITableViewDelegate, UITableViewDataSource {
     
 }
 
+import SwiftUI
+
+#Preview {
+    CategoriesViewController()
+}

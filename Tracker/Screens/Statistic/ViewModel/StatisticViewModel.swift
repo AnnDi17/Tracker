@@ -23,6 +23,8 @@ final class StatisticViewModel {
         loadStatisticFromStore()
         NotificationCenter.default.addObserver(self, selector: #selector(handleDataChange), name: .trackerDidAdd, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleDataChange), name: .trackerRecordDidChange, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDataChange), name: .trackerDidDelete, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDataChange), name: .trackerDidUpdate, object: nil)
     }
     
     deinit {

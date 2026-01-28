@@ -38,6 +38,24 @@ final class TrackersViewController: UIViewController {
     
     private var isEditingSearch = false
     
+    private lazy var blurView: UIVisualEffectView = {
+        let effect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let view = UIVisualEffectView(effect: effect)
+        view.isHidden = true
+        view.alpha = 0
+        let overlay = UIView()
+        overlay.isUserInteractionEnabled = false
+        overlay.backgroundColor = UIColor(white: 1.0, alpha: 0.01)
+        view.contentView.addSubviews([overlay])
+        NSLayoutConstraint.activate([
+            overlay.leadingAnchor.constraint(equalTo: view.contentView.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: view.contentView.trailingAnchor),
+            overlay.topAnchor.constraint(equalTo: view.contentView.topAnchor),
+            overlay.bottomAnchor.constraint(equalTo: view.contentView.bottomAnchor)
+        ])
+        return view
+    }()
+    
     private lazy var dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = Locale(identifier: "ru_RU")
@@ -66,6 +84,7 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .TrWhiteDay
         
         trackerStore.delegate = self
@@ -111,6 +130,14 @@ final class TrackersViewController: UIViewController {
         setupTrackersCollectionView()
         
         view.addSubviews([headerContainer, containerForEmptyResult, trackersCollectionView])
+
+        view.addSubviews([blurView])
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         
         searchBarLeading = searchBar.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor)
         searchBarTrailing = searchBar.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor)
@@ -136,8 +163,8 @@ final class TrackersViewController: UIViewController {
             containerForEmptyResult.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             
             trackersCollectionView.topAnchor.constraint(equalTo: headerContainer.bottomAnchor),
-            trackersCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            trackersCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            trackersCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            trackersCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             trackersCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
@@ -148,8 +175,8 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func addButtonTapped() {
-        let vc = NewHabitViewController()
-        vc.createHabit = { [weak self] tracker, category in
+        let vc = HabitViewController(isNewHabitMode: true)
+        vc.saveHabit = { [weak self] tracker, category in
             guard let self else {return}
             do {
                 let isCategoryExist = try self.trackerCategoryStore.isExistingCategory(withTitle: category)
@@ -233,6 +260,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.dataSource = self
         trackersCollectionView.register(TrackersCollectionViewCell.self, forCellWithReuseIdentifier: TrackersCollectionViewCell.reuseIdentifier)
         trackersCollectionView.register(TrackersSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier)
+        trackersCollectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     }
     
     private func createDatePickerContainer() -> UIView{
@@ -386,6 +414,92 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView,
+                        contextMenuConfigurationForItemAt indexPath: IndexPath,
+                        point: CGPoint) -> UIContextMenuConfiguration? {
+        let category = currentCategories[indexPath.section]
+        let tracker = currentCategories[indexPath.section].trackers[indexPath.row]
+        
+        let configuration = UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) {[weak self] _ in
+            let edit = UIAction(title: NSLocalizedString("edit", comment: "text for edit button")) { [weak self] _ in
+                let vc = HabitViewController(isNewHabitMode: false, tracker: tracker, category: category.title)
+                vc.saveHabit = { [weak self] tracker, category in
+                    guard let self else {return}
+                    do {
+                        let isCategoryExist = try self.trackerCategoryStore.isExistingCategory(withTitle: category)
+                        if !isCategoryExist {
+                            try self.trackerCategoryStore.addToStore(category)
+                        }
+                    }
+                    catch {
+                        print("HabitViewController.saveHabit: failed to check is category exist - \(error)")
+                        return
+                    }
+                    do {
+                        try self.trackerStore.updateInStore(tracker, categoryName: category)
+                    }
+                    catch {
+                        print("HabitViewController.saveHabit: failed to save tracker - \(error)")
+                    }
+                }
+                self?.present(vc,animated: true)
+            }
+            
+            let delete = UIAction(title: NSLocalizedString("delete", comment: "Delete"),
+                                  attributes: .destructive) { [weak self] _ in
+                guard let self else { return }
+                let sheet = DeleteItemSheetViewController(confirmLabelText: NSLocalizedString("item_delete_confirm_tracker", comment: "text for confirm delete action")){ [weak self] in
+                    do {
+                        try self?.trackerStore.deleteFromStore(id: tracker.id)
+                    }
+                    catch {
+                        print("DeleteItemSheetViewController.onDelete: failed to delete tracker from store - \(error)")
+                    }
+                }
+                sheet.modalPresentationStyle = .overFullScreen
+                sheet.modalTransitionStyle = .crossDissolve
+                self.present(sheet, animated: true)
+            }
+            
+            return UIMenu(title: "", children: [edit, delete])
+        }
+        return configuration
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? IndexPath,
+              let cell = collectionView.cellForItem(at: indexPath) as? TrackersCollectionViewCell  else { return nil }
+        return UITargetedPreview(view: cell.trackerView)
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let indexPath = configuration.identifier as? IndexPath,
+              let cell = collectionView.cellForItem(at: indexPath) as? TrackersCollectionViewCell else { return nil }
+        return UITargetedPreview(view: cell.trackerView)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        willDisplayContextMenu configuration: UIContextMenuConfiguration,
+                        animator: (any UIContextMenuInteractionAnimating)?) {
+        blurView.isHidden = false
+        animator?.addAnimations { [weak self] in
+            self?.blurView.alpha = 1
+        }
+    }
+
+    func collectionView(_ collectionView: UICollectionView,
+                        willEndContextMenuInteraction configuration: UIContextMenuConfiguration,
+                        animator: (any UIContextMenuInteractionAnimating)?) {
+        animator?.addAnimations { [weak self] in
+            self?.blurView.alpha = 0
+        }
+        animator?.addCompletion { [weak self] in
+            self?.blurView.isHidden = true
+        }
+    }
+    
     private func configCell(_ cell: TrackersCollectionViewCell, for indexPath: IndexPath) {
         let tracker = currentCategories[indexPath.section].trackers[indexPath.row]
         let daysCount = countOfDaysForTracker(withId: tracker.id, date: currentDate)
@@ -429,7 +543,8 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let totalWidth = collectionView.bounds.width
+        let insets: CGFloat = 16 + 16
+        let totalWidth = collectionView.bounds.width - insets
         let interItem: CGFloat = 9
         let availableWidth = totalWidth - interItem
         let itemWidth = floor(availableWidth / 2)
