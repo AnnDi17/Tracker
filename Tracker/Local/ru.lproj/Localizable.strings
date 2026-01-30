@@ -30,6 +30,13 @@
 "item_delete_confirm_category" = "Эта категория точно не нужна?";
 "item_delete_confirm_tracker" = "Уверены что хотите удалить трекер?";
 
+"filters" = "Фильтры";
+"all_trackers" = "Все трекеры";
+"today_trackers" = "Трекеры на сегодня";
+"canceled_trackers" = "Завершенные";
+"not_canceled_trackers" = "Не завершенные";
+
+
 "weekday_mon" = "Пн";
 "weekday_tue" = "Вт";
 "weekday_wed" = "Ср";

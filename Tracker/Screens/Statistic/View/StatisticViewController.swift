@@ -12,6 +12,20 @@ final class StatisticViewController: UIViewController {
     private let statisticTableView = UITableView()
     private let containerForEmptyResult = UIView()
     
+    init(viewModel: StatisticViewModel){
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    convenience init() {
+        let viewModel = StatisticViewModel()
+        self.init(viewModel: viewModel)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         

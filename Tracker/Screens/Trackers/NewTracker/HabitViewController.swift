@@ -287,12 +287,13 @@ final class HabitViewController: UIViewController {
     
     @objc private func createButtonTapped(){
         let name = nameTextField.text ?? ""
+        let days = trackerDays.isEmpty ? [.mon,.tue,.wed,.thu,.fri,.sat,.sun] : trackerDays
         let newTracker = Tracker(
             id: trackerId,
             name: name,
             color: trackerColor,
             emoji: trackerEmoji,
-            schedule: trackerDays
+            schedule: days
         )
         saveHabit?(newTracker, trackerCategory)
         dismiss(animated: true, completion: nil)
@@ -441,6 +442,19 @@ extension HabitViewController: UICollectionViewDelegate, UICollectionViewDataSou
             return UICollectionViewCell()
         }
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch collectionView {
+        case emojiCollectionView:
+            trackerEmoji = emojis[indexPath.row]
+        case colorsCollectionView:
+            trackerColor = colors[indexPath.row]
+        default:
+            break
+        }
+    }
+
+    
 }
 
 extension HabitViewController: UICollectionViewDelegateFlowLayout {
