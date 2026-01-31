@@ -72,7 +72,7 @@ final class CategoryViewController: UIViewController {
     private func setupNameTextField(){
         nameTextField.text = textForTextField
         nameTextField.padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        nameTextField.placeholder = NSLocalizedString("enter_category_name", comment: "text for textField placeholder")//"Введите название категории"
+        nameTextField.placeholder = NSLocalizedString("enter_category_name", comment: "text for textField placeholder")
         nameTextField.layer.cornerRadius = 16
         nameTextField.backgroundColor = .TrBackgroundDay
         nameTextField.returnKeyType = .done

@@ -2,8 +2,7 @@
 //  FixedHeightSearchBar.swift
 //  Tracker
 //
-//  Created by Анна Лапухина on 24.01.2026.
-//
+
 import UIKit
 
 final class FixedHeightSearchBar: UISearchBar {

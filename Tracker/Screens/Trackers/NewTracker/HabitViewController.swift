@@ -2,28 +2,13 @@
 //  NewHabitViewController.swift
 //  Tracker
 //
-#if DEBUG
-import SwiftUI
-
-@available(iOS 17.0, *)
-#Preview {
-    HabitViewController(isNewHabitMode: false)
-}
-#endif
 
 import UIKit
 
 final class HabitViewController: UIViewController {
     
     var saveHabit: ((Tracker, String) -> Void)?
-    
-    private let isNewHabitMode: Bool
-    private var isAllParametersFilled: Bool {
-        didSet{
-            okButton.backgroundColor = isAllParametersFilled ? .TrBlackDay : .TrGray
-            okButton.isEnabled = isAllParametersFilled
-        }
-    }
+
     
     private let titleForDays = UILabel()
     private let settingsTableView = UITableView()
@@ -34,6 +19,13 @@ final class HabitViewController: UIViewController {
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let okButton = UIButton()
     
+    private let isNewHabitMode: Bool
+    private var isAllParametersFilled: Bool {
+        didSet {
+            okButton.backgroundColor = isAllParametersFilled ? .TrBlackDay : .TrGray
+            okButton.isEnabled = isAllParametersFilled
+        }
+    }
     private var trackerDays: [WeekDay] {
         didSet {
             checkParameters()
@@ -97,8 +89,9 @@ final class HabitViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     override func viewDidLoad() {
@@ -214,7 +207,7 @@ final class HabitViewController: UIViewController {
     
     private func setupNameTextField(){
         nameTextField.padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        nameTextField.placeholder = NSLocalizedString("enter_tracker_name", comment: "text displayed in the name text field placeholder")//"Введите название трекера"
+        nameTextField.placeholder = NSLocalizedString("enter_tracker_name", comment: "text displayed in the name text field placeholder")
         nameTextField.layer.cornerRadius = 16
         nameTextField.backgroundColor = .TrBackgroundDay
         
@@ -223,7 +216,7 @@ final class HabitViewController: UIViewController {
     }
     
     private func setupErrorLabel(){
-        errorLabel.text = NSLocalizedString("limit_38_char", comment: "text displayed in the error label")//"Ограничение 38 символов"
+        errorLabel.text = NSLocalizedString("limit_38_char", comment: "text displayed in the error label")
         errorLabel.font = UIFont.systemFont(ofSize: 17)
         errorLabel.textColor = .TrRed
         errorLabel.textAlignment = .center
@@ -316,7 +309,6 @@ final class HabitViewController: UIViewController {
     
     @objc private func createButtonTapped(){
         let name = nameTextField.text ?? ""
-        //let days = trackerDays.isEmpty ? [.mon,.tue,.wed,.thu,.fri,.sat,.sun] : trackerDays
         let newTracker = Tracker(
             id: trackerId,
             name: name,
@@ -351,7 +343,7 @@ extension HabitViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         if daysCount == 7 {
-            daysString = NSLocalizedString("every_day", comment: "text for schedule")//"Каждый день"
+            daysString = NSLocalizedString("every_day", comment: "text for schedule")
         }
         
         let description = indexPath.row == 0 ? trackerCategory : daysString

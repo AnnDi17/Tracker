@@ -3,7 +3,7 @@
 //  Tracker
 //
 
-final class StatisticsCalculator{
+final class StatisticsCalculator {
     func totalStatistic(categories: [TrackerCategory], completedTrackers: [TrackerRecord]) -> [Metric]{
         return [
             Metric(

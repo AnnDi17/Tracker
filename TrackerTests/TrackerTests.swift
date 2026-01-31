@@ -2,8 +2,6 @@
 //  TrackerTests.swift
 //  TrackerTests
 //
-//  Created by Анна Лапухина on 31.01.2026.
-//
 
 import XCTest
 import SnapshotTesting

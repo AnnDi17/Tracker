@@ -22,8 +22,9 @@ final class StatisticViewController: UIViewController {
         self.init(viewModel: viewModel)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        nil
     }
     
     override func viewDidLoad() {
@@ -115,7 +116,7 @@ final class StatisticViewController: UIViewController {
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
         label.font = .systemFont(ofSize: 34, weight: .bold)
-        label.text = NSLocalizedString("statistics_title", comment:"Text for statistic label")//"Статистика"
+        label.text = NSLocalizedString("statistics_title", comment:"Text for statistic label")
         label.textColor = .TrBlackDay
         return label
     }
@@ -158,10 +159,5 @@ extension StatisticViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-import SwiftUI
-
-#Preview {
-    StatisticViewController()
-}
 
 

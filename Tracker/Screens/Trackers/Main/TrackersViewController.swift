@@ -10,18 +10,34 @@ final class TrackersViewController: UIViewController {
     private let dateLabel = UILabel()
     private let datePicker = UIDatePicker()
     private let trackersCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
-    
     private let containerForEmptyResult = UIView()
     private let emptyResultImageView = UIImageView()
     private let emptyResultLabel = UILabel()
-    
+    private let filterButton = UIButton()
     private let searchBar = UISearchBar()
     private var searchBarLeading: NSLayoutConstraint!
     private var searchBarTrailing: NSLayoutConstraint!
     private var searchBarTop: NSLayoutConstraint!
     private var searchBarBottom: NSLayoutConstraint!
     
-    private let filterButton = UIButton()
+    private lazy var blurView: UIVisualEffectView = {
+        let effect = UIBlurEffect(style: .systemUltraThinMaterial)
+        let view = UIVisualEffectView(effect: effect)
+        view.isHidden = true
+        view.alpha = 0
+        let overlay = UIView()
+        overlay.isUserInteractionEnabled = false
+        overlay.backgroundColor = UIColor(white: 1.0, alpha: 0.01)
+        view.contentView.addSubviews([overlay])
+        NSLayoutConstraint.activate([
+            overlay.leadingAnchor.constraint(equalTo: view.contentView.leadingAnchor),
+            overlay.trailingAnchor.constraint(equalTo: view.contentView.trailingAnchor),
+            overlay.topAnchor.constraint(equalTo: view.contentView.topAnchor),
+            overlay.bottomAnchor.constraint(equalTo: view.contentView.bottomAnchor)
+        ])
+        return view
+    }()
+    
     
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerStore = TrackerStore()
@@ -69,24 +85,6 @@ final class TrackersViewController: UIViewController {
     
     private var isEditingSearch = false
     
-    private lazy var blurView: UIVisualEffectView = {
-        let effect = UIBlurEffect(style: .systemUltraThinMaterial)
-        let view = UIVisualEffectView(effect: effect)
-        view.isHidden = true
-        view.alpha = 0
-        let overlay = UIView()
-        overlay.isUserInteractionEnabled = false
-        overlay.backgroundColor = UIColor(white: 1.0, alpha: 0.01)
-        view.contentView.addSubviews([overlay])
-        NSLayoutConstraint.activate([
-            overlay.leadingAnchor.constraint(equalTo: view.contentView.leadingAnchor),
-            overlay.trailingAnchor.constraint(equalTo: view.contentView.trailingAnchor),
-            overlay.topAnchor.constraint(equalTo: view.contentView.topAnchor),
-            overlay.bottomAnchor.constraint(equalTo: view.contentView.bottomAnchor)
-        ])
-        return view
-    }()
-    
     private lazy var dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.locale = Locale(identifier: "ru_RU")
@@ -115,11 +113,10 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .TrWhiteDay
         
         trackerStore.delegate = self
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(handleCategoryChange), name: .trackerCategoryDidChange, object: nil)
         
         categories = trackerStore.getTrackers()
@@ -138,7 +135,7 @@ final class TrackersViewController: UIViewController {
         )
         
         currentCategories = getTrackersOnDate(currentDate, with: filter)
-        
+//UI
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
@@ -407,7 +404,7 @@ final class TrackersViewController: UIViewController {
     
     private func createTitleLabel() -> UILabel {
         let titleLabel = UILabel()
-        titleLabel.text = NSLocalizedString("trackers_title", comment: "text for trackers view controller title")//"Трекеры"
+        titleLabel.text = NSLocalizedString("trackers_title", comment: "text for trackers view controller title")
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         titleLabel.textColor = .TrBlackDay
         return titleLabel
@@ -429,7 +426,7 @@ final class TrackersViewController: UIViewController {
         textField.textColor = .TrBlackDay
         textField.leftView?.tintColor = .TrGray
         textField.attributedPlaceholder = NSAttributedString(
-            string: NSLocalizedString("search", comment: "text field placeholder"),//"Поиск",
+            string: NSLocalizedString("search", comment: "text field placeholder"),
             attributes: [
                 .foregroundColor: UIColor.TrGray,
                 .font: UIFont.systemFont(ofSize: 17)
@@ -451,8 +448,6 @@ final class TrackersViewController: UIViewController {
     }
     
     private func createPictureContainer() -> UIView {
-        /*emptyResultImageView.image = UIImage(resource: .dizzy)
-         emptyResultLabel.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"*/
         emptyResultImageView.image = isExistTrackersOnDay ? UIImage(resource: .nothing) : UIImage(resource: .dizzy)
         emptyResultLabel.text = isExistTrackersOnDay ? NSLocalizedString("empty_search", comment: "text for empty searching result") : NSLocalizedString("empty_message", comment: "text for empty trackers view")
         emptyResultLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -720,7 +715,7 @@ extension TrackersViewController: UISearchBarDelegate {
         isEditingSearch = true
         searchBar.setShowsCancelButton(true, animated: true)
         emptyResultImageView.image = UIImage(resource: .nothing)
-        emptyResultLabel.text = NSLocalizedString("empty_search", comment: "text for empty searching result")//Ничего не найдено
+        emptyResultLabel.text = NSLocalizedString("empty_search", comment: "text for empty searching result")
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -730,7 +725,7 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.resignFirstResponder()
         currentCategories = getTrackersOnDate(currentDate, with: filter)
         emptyResultImageView.image = UIImage(resource: .dizzy)
-        emptyResultLabel.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")//"Что будем отслеживать?"
+        emptyResultLabel.text = NSLocalizedString("empty_message", comment: "text for empty trackers view")
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -752,9 +747,4 @@ extension TrackersViewController: UISearchBarDelegate {
     
 }
 
-import SwiftUI
-
-#Preview {
-    TrackersViewController()
-}
 

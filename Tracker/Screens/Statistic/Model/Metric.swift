@@ -3,7 +3,7 @@
 //  Tracker
 //
 
-struct Metric{
+struct Metric {
     let name: String
     let value: Int
 }

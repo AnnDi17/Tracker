@@ -54,10 +54,8 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         let image = isCompleted ? UIImage(resource: .checkmarkCustom).withTintColor(.TrWhiteDay) : UIImage(resource: .plusCustom).withTintColor(.TrWhiteDay)
         completedButton.setImage(image, for: .normal)
         
-        //let days = WordsMaker.standard.days(for: daysCount)
         let format = NSLocalizedString("numberOfDays", comment: "number of days")
         let localizedDays = String.localizedStringWithFormat(format, daysCount)
-        //daysLabel.text = "\(daysCount)" + " " + days
         daysLabel.text = localizedDays
     }
     

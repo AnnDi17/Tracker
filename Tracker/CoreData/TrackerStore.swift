@@ -38,7 +38,8 @@ final class TrackerStore: NSObject{
     }
     
     convenience override init() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { fatalError("TrackerStore: Can't get AppDelegate") }
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("TrackerStore: Can't get AppDelegate") }
         let context = appDelegate.persistentContainer.viewContext
         do{
             try self.init(context: context)

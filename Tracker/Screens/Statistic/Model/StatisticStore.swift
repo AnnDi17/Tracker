@@ -5,7 +5,7 @@
 
 import Foundation
 
-final class StatisticStore{
+final class StatisticStore {
     func fetchAll() -> [Metric] {
         [
             Metric(

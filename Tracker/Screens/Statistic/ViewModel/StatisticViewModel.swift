@@ -31,11 +31,6 @@ final class StatisticViewModel {
         NotificationCenter.default.removeObserver(self)
     }
     
-    /*func addMetricToStore(_ metric: MetricViewModel){
-     statisticStore.addToStore([Metric(name: metric.name, value: metric.value)])
-     loadStatisticFromStore()
-     }*/
-    
     private func updateMetricsInStore(new metrics: [MetricViewModel]){
         metrics.forEach {
             statisticStore.updateInStore(new: Metric(name: $0.name, value: $0.value))

@@ -55,7 +55,7 @@ final class ScheduleViewController: UIViewController {
     
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
-        label.text = NSLocalizedString("schedule", comment: "text for schedule")//"Расписание"
+        label.text = NSLocalizedString("schedule", comment: "text for schedule")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .TrBlackDay
         return label

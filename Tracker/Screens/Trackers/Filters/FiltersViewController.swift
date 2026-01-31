@@ -109,9 +109,3 @@ extension FiltersViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
 }
-
-import SwiftUI
-
-#Preview {
-    FiltersViewController()
-}
