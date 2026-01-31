@@ -10,7 +10,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     var onButtonTap: (()->Void)?
     
-    private var trackerView = UIView()
+    var trackerView = UIView()
     private var emojiLabel = UILabel()
     private var nameLabel = UILabel()
     
@@ -54,8 +54,9 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         let image = isCompleted ? UIImage(resource: .checkmarkCustom).withTintColor(.TrWhiteDay) : UIImage(resource: .plusCustom).withTintColor(.TrWhiteDay)
         completedButton.setImage(image, for: .normal)
         
-        let days = WordsMaker.standard.days(for: daysCount)
-        daysLabel.text = "\(daysCount)" + " " + days
+        let format = NSLocalizedString("numberOfDays", comment: "number of days")
+        let localizedDays = String.localizedStringWithFormat(format, daysCount)
+        daysLabel.text = localizedDays
     }
     
     private func setupEmojiLabel(){
@@ -68,7 +69,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     private func setupNameLabel(){
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        nameLabel.textColor = .TrWhiteDay
+        nameLabel.textColor = .TrWhite
     }
     
     private func setupDaysLabel(){

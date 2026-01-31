@@ -1,0 +1,44 @@
+/* 
+  Localizable.strings
+  Tracker
+*/
+
+"new_habit_title" = "New Habit";
+"edit_habit_title" = "Edit Habit";
+"enter_tracker_name" = "Enter tracker name";
+"limit_38_char" = "Limit of 38 characters";
+"category" = "Category";
+"enter_category_name" = "Enter category name";
+"empty_categories" = "You can group habits and events by meaning";
+"schedule" = "Schedule";
+"every_day" = "Every day";
+"create" = "Create";
+"edit" = "Edit";
+"save" = "Save";
+"delete" = "Delete";
+"item_delete_confirm_category" = "Are you sure you want to delete this category?";
+"item_delete_confirm_tracker" = "Are you sure you want to delete this tracker?";
+"cancel" = "Cancel";
+"done" = "Done";
+"emoji" = "Emoji";
+"color" = "Color";
+"search" = "Search";
+"filters" = "Filters";
+"all_trackers" = "All trackers";
+"today_trackers" = "Today's trackers";
+"canceled_trackers" = "Completed";
+"not_canceled_trackers" = "Not completed";
+"trackers_title" = "Trackers";
+"statistics_title" = "Statistics";
+"statistics_empty_message" = "Nothing to analyze yet";
+"empty_message" = "What will we be tracking?";
+"empty_search" = "Nothing found";
+"onboarding_button" = "Wow, what technology!";
+
+"weekday_mon" = "Mon";
+"weekday_tue" = "Tue";
+"weekday_wed" = "Wed";
+"weekday_thu" = "Thu";
+"weekday_fri" = "Fri";
+"weekday_sat" = "Sat";
+"weekday_sun" = "Sun";

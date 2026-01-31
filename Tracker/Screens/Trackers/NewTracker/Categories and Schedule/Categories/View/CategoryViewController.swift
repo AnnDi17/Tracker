@@ -72,7 +72,7 @@ final class CategoryViewController: UIViewController {
     private func setupNameTextField(){
         nameTextField.text = textForTextField
         nameTextField.padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        nameTextField.placeholder = "Введите название категории"
+        nameTextField.placeholder = NSLocalizedString("enter_category_name", comment: "text for textField placeholder")
         nameTextField.layer.cornerRadius = 16
         nameTextField.backgroundColor = .TrBackgroundDay
         nameTextField.returnKeyType = .done
@@ -82,7 +82,7 @@ final class CategoryViewController: UIViewController {
     
     private func setupCreateButton(){
         okButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
-        okButton.setTitle("Готово", for: .normal)
+        okButton.setTitle(NSLocalizedString("done", comment: "text for ok button"), for: .normal)
         okButton.setTitleColor(UIColor.TrWhiteDay, for: .normal)
         okButton.backgroundColor = .TrGray
         okButton.layer.cornerRadius = 16

@@ -1,0 +1,46 @@
+/* 
+  Localizable.strings
+  Tracker
+*/
+
+"new_habit_title" = "Новая привычка";
+"edit_habit_title" = "Редактирование привычки";
+"enter_tracker_name" = "Введите название трекера";
+"limit_38_char" = "Ограничение 38 символов";
+"category" = "Категория";
+"schedule" = "Расписание";
+"every_day" = "Каждый день";
+"create" = "Создать";
+"edit" = "Редактировать";
+"cancel" = "Отменить";
+"done" = "Готово";
+"save" = "Сохранить";
+"delete" = "Удалить";
+"emoji" = "Emoji";
+"color" = "Цвет";
+"enter_category_name" = "Введите название категории";
+"search" = "Поиск";
+"trackers_title" = "Трекеры";
+"statistics_title" = "Статистика";
+"statistics_empty_message" = "Анализировать пока нечего";
+"empty_message" = "Что будем отслеживать?";
+"empty_search" = "Ничего не найдено";
+"empty_categories" = "Привычки и события можно\nобъединить по смыслу";
+"onboarding_button" = "Вот это технологии!";
+"item_delete_confirm_category" = "Эта категория точно не нужна?";
+"item_delete_confirm_tracker" = "Уверены что хотите удалить трекер?";
+
+"filters" = "Фильтры";
+"all_trackers" = "Все трекеры";
+"today_trackers" = "Трекеры на сегодня";
+"canceled_trackers" = "Завершенные";
+"not_canceled_trackers" = "Не завершенные";
+
+
+"weekday_mon" = "Пн";
+"weekday_tue" = "Вт";
+"weekday_wed" = "Ср";
+"weekday_thu" = "Чт";
+"weekday_fri" = "Пт";
+"weekday_sat" = "Сб";
+"weekday_sun" = "Вск";

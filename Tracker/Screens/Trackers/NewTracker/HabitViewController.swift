@@ -3,32 +3,50 @@
 //  Tracker
 //
 
-/*#if DEBUG
-import SwiftUI
-
-@available(iOS 17.0, *)
-#Preview {
-    NewHabitViewController()
-}
-#endif*/
-
 import UIKit
 
-final class NewHabitViewController: UIViewController {
+final class HabitViewController: UIViewController {
     
-    var createHabit: ((Tracker, String) -> Void)?
+    var saveHabit: ((Tracker, String) -> Void)?
+
     
+    private let titleForDays = UILabel()
     private let settingsTableView = UITableView()
     private let nameTextField = PaddedTextField()
     private let errorLabel = UILabel()
     private var errorHeightConstraint: NSLayoutConstraint?
     private let emojiCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let okButton = UIButton()
     
-    private var trackerDays: [WeekDay] = []
-    private var trackerCategory: String = ""
-    private var trackerEmoji: String = ""
-    private var trackerColor: UIColor = .TrBlue
+    private let isNewHabitMode: Bool
+    private var isAllParametersFilled: Bool {
+        didSet {
+            okButton.backgroundColor = isAllParametersFilled ? .TrBlackDay : .TrGray
+            okButton.isEnabled = isAllParametersFilled
+        }
+    }
+    private var trackerDays: [WeekDay] {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerCategory: String {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerEmoji: String {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerColor: UIColor {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerId: UUID
     
     private let emojis: [String] = [
         "😀", "😇", "😂", "😍", "🥳", "😎", "😴", "🤔", "🤩",
@@ -57,11 +75,31 @@ final class NewHabitViewController: UIViewController {
         UIColor(red: 112/255, green: 128/255, blue: 144/255, alpha: 1)
     ]
     
+    init(isNewHabitMode: Bool, tracker: Tracker? = nil, category: String = ""){
+        self.isNewHabitMode = isNewHabitMode
+        isAllParametersFilled = !isNewHabitMode
+        
+        nameTextField.text = tracker?.name
+        trackerDays = tracker?.schedule ?? []
+        trackerCategory = category
+        trackerEmoji = tracker?.emoji ?? ""
+        trackerColor = tracker?.color ?? .clear
+        trackerId = tracker?.id ?? UUID()
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .TrWhiteDay
         
         let titleLabel = getTitleLabel()
+        setupTitleForDays()
         
         let scrollView = UIScrollView()
         let contentView = UIView()
@@ -76,7 +114,7 @@ final class NewHabitViewController: UIViewController {
         
         let buttonsStackView = getButtonsStackView()
         
-        view.addSubviews([titleLabel, scrollView, buttonsStackView])
+        view.addSubviews([titleLabel, titleForDays, scrollView, buttonsStackView])
         
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
@@ -93,7 +131,10 @@ final class NewHabitViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 27),
             titleLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             
-            scrollView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 14),
+            titleForDays.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
+            titleForDays.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            
+            scrollView.topAnchor.constraint(equalTo: titleForDays.bottomAnchor, constant: 14),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: buttonsStackView.topAnchor, constant: -14),
@@ -133,17 +174,40 @@ final class NewHabitViewController: UIViewController {
         view.addGestureRecognizer(tap)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if !isNewHabitMode {
+            guard let rowEmoji = emojis.firstIndex(of: trackerEmoji) else { return }
+            let indexPath = IndexPath(row: rowEmoji, section: 0)
+            emojiCollectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            guard let rowColors = colors.firstIndex(of: trackerColor) else { return }
+            let indexPathColor = IndexPath(row: rowColors, section: 0)
+            colorsCollectionView.selectItem(at: indexPathColor, animated: false, scrollPosition: [])
+        }
+    }
+    
+    private func checkParameters(){
+        guard let name = nameTextField.text else {return}
+        isAllParametersFilled = !name.isEmpty && !trackerDays.isEmpty && !trackerCategory.isEmpty && !trackerEmoji.isEmpty && !(trackerColor == .clear)
+    }
+    
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
-        label.text = "Новая привычка"
+        label.text = isNewHabitMode ? NSLocalizedString("new_habit_title", comment: "text displayed in the title label of the habit view controller") : NSLocalizedString("edit_habit_title", comment: "text displayed in the title label of the habit view controller")
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.textColor = .TrBlackDay
         return label
     }
     
+    private func setupTitleForDays(){
+        titleForDays.text = isNewHabitMode ? "" : "8 дней"
+        titleForDays.font = .systemFont(ofSize: 32, weight: .bold)
+        titleForDays.textColor = .TrBlackDay
+    }
+    
     private func setupNameTextField(){
         nameTextField.padding = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        nameTextField.placeholder = "Введите название трекера"
+        nameTextField.placeholder = NSLocalizedString("enter_tracker_name", comment: "text displayed in the name text field placeholder")
         nameTextField.layer.cornerRadius = 16
         nameTextField.backgroundColor = .TrBackgroundDay
         
@@ -152,7 +216,7 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func setupErrorLabel(){
-        errorLabel.text = "Ограничение 38 символов"
+        errorLabel.text = NSLocalizedString("limit_38_char", comment: "text displayed in the error label")
         errorLabel.font = UIFont.systemFont(ofSize: 17)
         errorLabel.textColor = .TrRed
         errorLabel.textAlignment = .center
@@ -190,7 +254,7 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func getButtonsStackView() -> UIStackView{
-        let createButton = getCreateButton()
+        let createButton = isNewHabitMode ? getCreateButton() : getSaveButton()
         let cancelButton = getCancelButton()
         let stackView = UIStackView(arrangedSubviews: [cancelButton, createButton])
         stackView.axis = .horizontal
@@ -201,20 +265,31 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func getCreateButton() -> UIButton{
-        let button = UIButton()
-        button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
-        button.setTitle("Создать", for: .normal)
-        button.setTitleColor(UIColor.TrWhiteDay, for: .normal)
-        button.backgroundColor = .TrGray
-        button.layer.cornerRadius = 16
-        button.layer.masksToBounds = true
-        return button
+        okButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        okButton.setTitle(NSLocalizedString("create", comment: "text for create button"), for: .normal)
+        okButton.setTitleColor(UIColor.TrWhiteDay, for: .normal)
+        okButton.backgroundColor = .TrGray
+        okButton.layer.cornerRadius = 16
+        okButton.layer.masksToBounds = true
+        okButton.isEnabled = false
+        return okButton
+    }
+    
+    private func getSaveButton() -> UIButton{
+        okButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        okButton.setTitle(NSLocalizedString("save", comment: "text for save button"), for: .normal)
+        okButton.setTitleColor(UIColor.TrWhiteDay, for: .normal)
+        okButton.backgroundColor = .TrBlackDay
+        okButton.layer.cornerRadius = 16
+        okButton.layer.masksToBounds = true
+        okButton.isEnabled = true
+        return okButton
     }
     
     private func getCancelButton() -> UIButton{
         let button = UIButton()
         button.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("cancel", comment: "text for cancel button"), for: .normal)
         button.setTitleColor(UIColor.TrRed, for: .normal)
         button.backgroundColor = .clear
         button.layer.cornerRadius = 16
@@ -235,19 +310,19 @@ final class NewHabitViewController: UIViewController {
     @objc private func createButtonTapped(){
         let name = nameTextField.text ?? ""
         let newTracker = Tracker(
-            id: UUID(),
+            id: trackerId,
             name: name,
             color: trackerColor,
             emoji: trackerEmoji,
             schedule: trackerDays
         )
-        createHabit?(newTracker, trackerCategory)
+        saveHabit?(newTracker, trackerCategory)
         dismiss(animated: true, completion: nil)
     }
     
 }
 
-extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
+extension HabitViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         2
     }
@@ -268,12 +343,12 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         if daysCount == 7 {
-            daysString = "Каждый день"
+            daysString = NSLocalizedString("every_day", comment: "text for schedule")
         }
         
         let description = indexPath.row == 0 ? trackerCategory : daysString
         
-        cell.config(with: indexPath.row == 0 ? "Категория" : "Расписание",description)
+        cell.config(with: indexPath.row == 0 ? NSLocalizedString("category", comment: "") : NSLocalizedString("schedule", comment: ""),description)
         return cell
     }
     
@@ -303,7 +378,7 @@ extension NewHabitViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-extension NewHabitViewController: UITextFieldDelegate {
+extension HabitViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
@@ -330,9 +405,13 @@ extension NewHabitViewController: UITextFieldDelegate {
         errorHeightConstraint?.isActive = true
         return true
     }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        checkParameters()
+    }
 }
 
-extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+extension HabitViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView {
         case emojiCollectionView: emojis.count
@@ -354,14 +433,14 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
                 print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
-            headerView.config(with: "Emoji")
+            headerView.config(with: NSLocalizedString("emoji", comment: "text for emoji section header"))
             return headerView
         case colorsCollectionView:
             guard let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: ColorSectionHeaderView.reuseIdentifier, for: indexPath) as? ColorSectionHeaderView else {
                 print("NewHabitViewController.collectionView: could not create Header View")
                 return UICollectionReusableView()
             }
-            headerView.config(with: "Цвет")
+            headerView.config(with: NSLocalizedString("color", comment: "text for color section header"))
             return headerView
         default:
             return UICollectionReusableView()
@@ -393,32 +472,17 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
         switch collectionView {
         case emojiCollectionView:
             trackerEmoji = emojis[indexPath.row]
-            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
-            cell.didSelect()
         case colorsCollectionView:
             trackerColor = colors[indexPath.row]
-            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
-            cell.didSelect()
         default:
             break
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        switch collectionView {
-        case emojiCollectionView:
-            guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiCollectionViewCell else { return }
-            cell.didDeselect()
-        case colorsCollectionView:
-            guard let cell = collectionView.cellForItem(at: indexPath) as? ColorCollectionViewCell else { return }
-            cell.didDeselect()
-        default:
-            break
-        }
-    }
+    
 }
 
-extension NewHabitViewController: UICollectionViewDelegateFlowLayout {
+extension HabitViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {

@@ -29,7 +29,7 @@ final class OnboardingViewController: UIViewController {
     private let button: UIButton = {
         let button = UIButton(type: .system)
         
-        button.setTitle("Вот это технологии!", for: .normal)
+        button.setTitle(NSLocalizedString("onboarding_button", comment: "text on onboarding button"), for: .normal)
         button.tintColor = .TrWhiteDay
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         

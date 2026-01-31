@@ -6,6 +6,10 @@
 import UIKit
 import CoreData
 
+extension Notification.Name {
+    static let trackerRecordDidChange = Notification.Name("trackerRecordDidChange")
+}
+
 final class TrackerRecordStore{
     private let context: NSManagedObjectContext
     
@@ -42,6 +46,7 @@ final class TrackerRecordStore{
             newData.tracker = result[0]
         }
         try context.save()
+        NotificationCenter.default.post(name: .trackerRecordDidChange, object: nil)
     }
     
     func deleteFromStore(trackerId: UUID, date: Date) throws {
@@ -54,6 +59,7 @@ final class TrackerRecordStore{
         else {
             context.delete(result[0])
             try context.save()
+            NotificationCenter.default.post(name: .trackerRecordDidChange, object: nil)
         }
     }
     

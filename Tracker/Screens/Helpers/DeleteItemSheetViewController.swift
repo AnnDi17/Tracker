@@ -1,19 +1,31 @@
 //
-//  DeleteCategorySheetViewController.swift
+//  DeleteItemSheetViewController.swift
 //  Tracker
 //
 
 import UIKit
 
-final class DeleteCategorySheetViewController: UIViewController {
+final class DeleteItemSheetViewController: UIViewController {
     
     private let sheetView = UIView()
     private let messageLabel = UILabel()
     private let deleteButton = UIButton(type: .system)
     private let cancelButton = UIButton(type: .system)
     private let separator = UIView()
+    private let confirmLabelText: String
     
     var onDelete: (() -> Void)?
+    
+    init(confirmLabelText: String, onDelete: (() -> Void)?) {
+        self.confirmLabelText = confirmLabelText
+        self.onDelete = onDelete
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        nil
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,12 +46,12 @@ final class DeleteCategorySheetViewController: UIViewController {
         sheetView.layer.cornerRadius = 13
         sheetView.layer.masksToBounds = true
         
-        messageLabel.text = "Эта категория точно не нужна?"
+        messageLabel.text = confirmLabelText
         messageLabel.font = .systemFont(ofSize: 13, weight: .regular)
         messageLabel.textColor = UIColor(red: 60/255, green: 60/255, blue: 67/255, alpha: 0.6)
         messageLabel.textAlignment = .center
         
-        deleteButton.setTitle("Удалить", for: .normal)
+        deleteButton.setTitle(NSLocalizedString("delete", comment: "text for delete button"), for: .normal)
         deleteButton.setTitleColor(.TrSystemRed, for: .normal)
         deleteButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         deleteButton.backgroundColor = .clear
@@ -54,7 +66,7 @@ final class DeleteCategorySheetViewController: UIViewController {
             separator.heightAnchor.constraint(equalToConstant: 0.5)
         ])
         
-        cancelButton.setTitle("Отменить", for: .normal)
+        cancelButton.setTitle(NSLocalizedString("cancel", comment: "text for cancel button"), for: .normal)
         cancelButton.setTitleColor(.TrSystemBlue, for: .normal)
         cancelButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
         cancelButton.backgroundColor = .TrWhiteDay

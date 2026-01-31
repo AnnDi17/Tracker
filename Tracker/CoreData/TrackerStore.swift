@@ -5,6 +5,12 @@
 import UIKit
 import CoreData
 
+extension Notification.Name {
+    static let trackerDidAdd = Notification.Name("trackerDidAdd")
+    static let trackerDidDelete = Notification.Name("trackerDidDelete")
+    static let trackerDidUpdate = Notification.Name("trackerDidUpdate")
+}
+
 final class TrackerStore: NSObject{
     
     private let context: NSManagedObjectContext
@@ -32,7 +38,8 @@ final class TrackerStore: NSObject{
     }
     
     convenience override init() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { fatalError("TrackerStore: Can't get AppDelegate") }
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            fatalError("TrackerStore: Can't get AppDelegate") }
         let context = appDelegate.persistentContainer.viewContext
         do{
             try self.init(context: context)
@@ -54,6 +61,17 @@ final class TrackerStore: NSObject{
         return categories
     }
     
+    func hasTrackers() -> Bool{
+        let request = TrackerCoreData.fetchRequest()
+        do{
+            return try context.count(for: request) > 0
+        }
+        catch {
+            print("TrackerStore.hasTrackers: Can't fetch trackers: \(error)")
+            return false
+        }
+    }
+    
     func addToStore(_ tracker: Tracker, categoryName: String) throws{
         let newTracker = TrackerCoreData(context: context)
         newTracker.trackerId = tracker.id
@@ -73,6 +91,49 @@ final class TrackerStore: NSObject{
             newTracker.category = result[0]
         }
         try context.save()
+        NotificationCenter.default.post(name: .trackerDidAdd, object: nil)
+    }
+    
+    func getFromStore(id: UUID) throws -> TrackerCoreData? {
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "%K == %@",#keyPath(TrackerCoreData.trackerId), id as CVarArg)
+        return try context.fetch(request).first
+    }
+    
+    func deleteFromStore(id: UUID) throws {
+        guard let trackerToDelete = try getFromStore(id: id) else {
+            print("TrackerStore.deleteFromStore: no tracker with id \(id)")
+            return
+        }
+        context.delete(trackerToDelete)
+        try context.save()
+        NotificationCenter.default.post(name: .trackerDidDelete, object: nil)
+    }
+    
+    func updateInStore(_ tracker: Tracker, categoryName: String) throws {
+        guard let trackerToUpdate = try getFromStore(id: tracker.id) else {
+            print("TrackerStore.updateInStore: no tracker with id \(tracker.id)")
+            let all = try context.fetch(TrackerCoreData.fetchRequest())
+            return
+        }
+        trackerToUpdate.name = tracker.name
+        trackerToUpdate.color = UIColorMarshalling.hexString(from:tracker.color)
+        trackerToUpdate.emoji = tracker.emoji
+        trackerToUpdate.schedule = ScheduleTransformer.transformedValue(tracker.schedule) as? Data
+        
+        let request = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "%K == %@",#keyPath(TrackerCategoryCoreData.title), categoryName)
+        request.fetchLimit = 1
+        let result = try context.fetch(request)
+        if result.isEmpty{
+            print("TrackerStore.updateInStore: category with name \(categoryName) doesn't exist")
+        }
+        else{
+            trackerToUpdate.category = result[0]
+        }
+        try context.save()
+        
+        NotificationCenter.default.post(name: .trackerDidUpdate, object: nil)
     }
     
     func refetch() {
@@ -114,6 +175,7 @@ final class TrackerStore: NSObject{
         )
         return tracker
     }
+
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
