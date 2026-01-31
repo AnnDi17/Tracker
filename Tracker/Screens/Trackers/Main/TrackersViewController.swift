@@ -26,6 +26,7 @@ final class TrackersViewController: UIViewController {
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerStore = TrackerStore()
     private let trackerRecordStore = TrackerRecordStore()
+    private let analyticsService = AnalyticsService()
     
     private var categories: [TrackerCategory] = []{
         didSet {
@@ -205,12 +206,23 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .open)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .close)
+    }
+    
     deinit {
         NotificationCenter.default.removeObserver(self, name: .trackerCategoryDidChange, object: nil)
     }
     
     // MARK: - Actions
     @objc private func addButtonTapped() {
+        analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .click, item: "add_track")
         let vc = HabitViewController(isNewHabitMode: true)
         vc.saveHabit = { [weak self] tracker, category in
             guard let self else {return}
@@ -250,6 +262,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped(){
+        analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .click, item: "filter")
         let vc = FiltersViewController()
         vc.filterDidSelect = {[weak self] selectedFilter in
             self?.filter = selectedFilter
@@ -532,6 +545,8 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         
         let configuration = UIContextMenuConfiguration(identifier: indexPath as NSCopying, previewProvider: nil) {[weak self] _ in
             let edit = UIAction(title: NSLocalizedString("edit", comment: "text for edit button")) { [weak self] _ in
+                guard let self else { return }
+                self.analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .click, item: "edit")
                 let vc = HabitViewController(isNewHabitMode: false, tracker: tracker, category: category.title)
                 vc.saveHabit = { [weak self] tracker, category in
                     guard let self else {return}
@@ -552,12 +567,13 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
                         print("HabitViewController.saveHabit: failed to save tracker - \(error)")
                     }
                 }
-                self?.present(vc,animated: true)
+                self.present(vc,animated: true)
             }
             
             let delete = UIAction(title: NSLocalizedString("delete", comment: "Delete"),
                                   attributes: .destructive) { [weak self] _ in
                 guard let self else { return }
+                self.analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .click, item: "delete")
                 let sheet = DeleteItemSheetViewController(confirmLabelText: NSLocalizedString("item_delete_confirm_tracker", comment: "text for confirm delete action")){ [weak self] in
                     do {
                         try self?.trackerStore.deleteFromStore(id: tracker.id)
@@ -617,6 +633,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         cell.config(description: tracker.name, emoji: tracker.emoji, color: tracker.color, daysCount: daysCount, isCompleted: isCompleted)
         cell.onButtonTap = { [weak self] in
             guard let self else {return}
+            analyticsService.sendEvent(screenName: String(describing: type(of: self)), event: .click, item: "track")
             if self.currentDate > Date().normDate {return}
             if isCompleted {
                 let newCompletedTrackers = self.completedTrackers.filter{ $0.id != tracker.id || $0.date != self.currentDate}
