@@ -71,7 +71,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     private func setupNameLabel(){
         nameLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        nameLabel.textColor = .TrWhiteDay
+        nameLabel.textColor = .TrWhite
     }
     
     private func setupDaysLabel(){

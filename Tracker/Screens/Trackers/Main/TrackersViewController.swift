@@ -342,6 +342,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.register(TrackersCollectionEmptyViewCell.self, forCellWithReuseIdentifier: TrackersCollectionEmptyViewCell.reuseIdentifier)
         trackersCollectionView.register(TrackersSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: TrackersSectionHeaderView.reuseIdentifier)
         trackersCollectionView.contentInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        trackersCollectionView.backgroundColor = .TrWhiteDay
     }
     
     private func createDatePickerContainer() -> UIView{
@@ -353,13 +354,14 @@ final class TrackersViewController: UIViewController {
         updateDateLabelText(with: datePicker.date)
         
         let emptyView = UIView()
-        emptyView.backgroundColor = .TrWhiteDay
+        emptyView.backgroundColor = UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1)
+        emptyView.layer.cornerRadius = 8
         emptyView.isUserInteractionEnabled = false
         
-        dateLabel.textColor = .TrBlackDay
+        dateLabel.textColor = UIColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 1)
         dateLabel.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         dateLabel.textAlignment = .center
-        dateLabel.backgroundColor = UIColor(red: 118/255, green: 118/255, blue: 128/255, alpha: 0.12)
+        dateLabel.backgroundColor = UIColor(red: 118.0/255.0, green: 118.0/255.0, blue: 128.0/255.0, alpha: 0.12)
         dateLabel.layer.cornerRadius = 8
         dateLabel.layer.masksToBounds = true
         dateLabel.isUserInteractionEnabled = false
@@ -394,7 +396,7 @@ final class TrackersViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.text = NSLocalizedString("trackers_title", comment: "text for trackers view controller title")//"Трекеры"
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
-        titleLabel.textColor = .black
+        titleLabel.textColor = .TrBlackDay
         return titleLabel
     }
     

@@ -109,7 +109,7 @@ final class StatisticViewController: UIViewController {
         statisticTableView.dataSource = self
         statisticTableView.delegate = self
         statisticTableView.register(StatisticTableViewCell.self, forCellReuseIdentifier: StatisticTableViewCell.reuseIdentifier)
-        statisticTableView.backgroundColor = .clear
+        statisticTableView.backgroundColor = .TrWhiteDay
     }
     
     private func getTitleLabel() -> UILabel{

@@ -18,6 +18,12 @@ final class HabitViewController: UIViewController {
     var saveHabit: ((Tracker, String) -> Void)?
     
     private let isNewHabitMode: Bool
+    private var isAllParametersFilled: Bool {
+        didSet{
+            okButton.backgroundColor = isAllParametersFilled ? .TrBlackDay : .TrGray
+            okButton.isEnabled = isAllParametersFilled
+        }
+    }
     
     private let titleForDays = UILabel()
     private let settingsTableView = UITableView()
@@ -26,11 +32,28 @@ final class HabitViewController: UIViewController {
     private var errorHeightConstraint: NSLayoutConstraint?
     private let emojiCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     private let colorsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let okButton = UIButton()
     
-    private var trackerDays: [WeekDay]
-    private var trackerCategory: String
-    private var trackerEmoji: String
-    private var trackerColor: UIColor
+    private var trackerDays: [WeekDay] {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerCategory: String {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerEmoji: String {
+        didSet {
+            checkParameters()
+        }
+    }
+    private var trackerColor: UIColor {
+        didSet {
+            checkParameters()
+        }
+    }
     private var trackerId: UUID
     
     private let emojis: [String] = [
@@ -62,12 +85,13 @@ final class HabitViewController: UIViewController {
     
     init(isNewHabitMode: Bool, tracker: Tracker? = nil, category: String = ""){
         self.isNewHabitMode = isNewHabitMode
+        isAllParametersFilled = !isNewHabitMode
         
         nameTextField.text = tracker?.name
         trackerDays = tracker?.schedule ?? []
         trackerCategory = category
         trackerEmoji = tracker?.emoji ?? ""
-        trackerColor = tracker?.color ?? .TrBlue
+        trackerColor = tracker?.color ?? .clear
         trackerId = tracker?.id ?? UUID()
         
         super.init(nibName: nil, bundle: nil)
@@ -169,6 +193,11 @@ final class HabitViewController: UIViewController {
         }
     }
     
+    private func checkParameters(){
+        guard let name = nameTextField.text else {return}
+        isAllParametersFilled = !name.isEmpty && !trackerDays.isEmpty && !trackerCategory.isEmpty && !trackerEmoji.isEmpty && !(trackerColor == .clear)
+    }
+    
     private func getTitleLabel() -> UILabel{
         let label = UILabel()
         label.text = isNewHabitMode ? NSLocalizedString("new_habit_title", comment: "text displayed in the title label of the habit view controller") : NSLocalizedString("edit_habit_title", comment: "text displayed in the title label of the habit view controller")
@@ -243,25 +272,25 @@ final class HabitViewController: UIViewController {
     }
     
     private func getCreateButton() -> UIButton{
-        let button = UIButton()
-        button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
-        button.setTitle(NSLocalizedString("create", comment: "text for create button"), for: .normal)
-        button.setTitleColor(UIColor.TrWhiteDay, for: .normal)
-        button.backgroundColor = .TrGray
-        button.layer.cornerRadius = 16
-        button.layer.masksToBounds = true
-        return button
+        okButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        okButton.setTitle(NSLocalizedString("create", comment: "text for create button"), for: .normal)
+        okButton.setTitleColor(UIColor.TrWhiteDay, for: .normal)
+        okButton.backgroundColor = .TrGray
+        okButton.layer.cornerRadius = 16
+        okButton.layer.masksToBounds = true
+        okButton.isEnabled = false
+        return okButton
     }
     
     private func getSaveButton() -> UIButton{
-        let button = UIButton()
-        button.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
-        button.setTitle(NSLocalizedString("save", comment: "text for save button"), for: .normal)
-        button.setTitleColor(UIColor.TrWhiteDay, for: .normal)
-        button.backgroundColor = .TrBlackDay
-        button.layer.cornerRadius = 16
-        button.layer.masksToBounds = true
-        return button
+        okButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        okButton.setTitle(NSLocalizedString("save", comment: "text for save button"), for: .normal)
+        okButton.setTitleColor(UIColor.TrWhiteDay, for: .normal)
+        okButton.backgroundColor = .TrBlackDay
+        okButton.layer.cornerRadius = 16
+        okButton.layer.masksToBounds = true
+        okButton.isEnabled = true
+        return okButton
     }
     
     private func getCancelButton() -> UIButton{
@@ -287,13 +316,13 @@ final class HabitViewController: UIViewController {
     
     @objc private func createButtonTapped(){
         let name = nameTextField.text ?? ""
-        let days = trackerDays.isEmpty ? [.mon,.tue,.wed,.thu,.fri,.sat,.sun] : trackerDays
+        //let days = trackerDays.isEmpty ? [.mon,.tue,.wed,.thu,.fri,.sat,.sun] : trackerDays
         let newTracker = Tracker(
             id: trackerId,
             name: name,
             color: trackerColor,
             emoji: trackerEmoji,
-            schedule: days
+            schedule: trackerDays
         )
         saveHabit?(newTracker, trackerCategory)
         dismiss(animated: true, completion: nil)
@@ -384,6 +413,10 @@ extension HabitViewController: UITextFieldDelegate {
         errorHeightConstraint?.isActive = true
         return true
     }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        checkParameters()
+    }
 }
 
 extension HabitViewController: UICollectionViewDelegate, UICollectionViewDataSource {
@@ -453,7 +486,7 @@ extension HabitViewController: UICollectionViewDelegate, UICollectionViewDataSou
             break
         }
     }
-
+    
     
 }
 

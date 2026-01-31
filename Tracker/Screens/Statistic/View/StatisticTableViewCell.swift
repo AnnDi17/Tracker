@@ -39,7 +39,6 @@ final class StatisticTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         contentView.backgroundColor = .TrWhiteDay
-        contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = false
         
         contentView.addSubviews([valueLabel, nameLabel])
@@ -84,8 +83,6 @@ final class StatisticTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
-        valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             valueLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
